@@ -7,12 +7,15 @@ import { ApiResponse } from '@/utils/response/api.response';
 
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { Roles } from '@/utils/decorators/role.decorator';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async signUp(dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
+  @Roles(Role.BUYER)
+  async signUpBuyer(dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
     try {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -29,15 +32,7 @@ export class UserRepository implements UserRepositoryInterface {
           name: dto.name,
           email: dto.email,
           password: hashedPassword,
-          addresses: {
-            create: [
-              // TODO: STORE ADDRESS
-            ],
-          },
           role: dto.role,
-        },
-        include: {
-          addresses: true,
         },
       });
 

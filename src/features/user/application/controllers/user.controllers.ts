@@ -11,6 +11,6 @@ export class UserController {
 
   @Post('/sign-up')
   async createUser(@Body() dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
-    return await this.useCase.signUp(dto);
+    return await this.useCase.signUpBuyer(dto);
   }
 }

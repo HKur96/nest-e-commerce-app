@@ -8,7 +8,7 @@ import { ApiResponse } from '@/utils/response/api.response';
 export class UserUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async signUp(dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
-    return await this.userRepository.signUp(dto);
+  async signUpBuyer(dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
+    return await this.userRepository.signUpBuyer(dto);
   }
 }
