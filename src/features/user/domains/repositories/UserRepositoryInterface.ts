@@ -3,5 +3,5 @@ import { SignUpDto } from '../dtos/signUp.dto';
 import { UserResponse } from '../responses/user.response';
 
 export interface UserRepositoryInterface {
-  signUp(user: SignUpDto): Promise<ApiResponse<UserResponse>>;
+  signUpBuyer(user: SignUpDto): Promise<ApiResponse<UserResponse>>;
 }

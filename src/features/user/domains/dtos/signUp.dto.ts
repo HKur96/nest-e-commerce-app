@@ -21,22 +21,6 @@ export class SignUpDto {
   password: string;
 
   @IsNotEmpty()
-  address: string;
-
-  @IsNotEmpty()
   @IsEnum(Role, { message: 'role must be either ADMIN, BUYER, or SELLER' })
   role: Role;
-
-  @IsNotEmpty()
-  @IsString()
-  street: string;
-
-
-  city: string;
-
-  state: string;
-
-  zipCode: string;
-  
-  country: string;
 }
