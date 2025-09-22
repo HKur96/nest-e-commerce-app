@@ -15,7 +15,7 @@ export class ApiResponse<T = any> {
       status_code?: number;
     } = {},
   ) {
-    this.data = options.data;
+    this.data = options.data || null;
     this.meta = {
       success: options.success ?? true,
       message,

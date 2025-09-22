@@ -7,14 +7,49 @@ import { ApiResponse } from '@/utils/response/api.response';
 
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { Roles } from '@/utils/decorators/role.decorator';
-import { Role } from '@prisma/client';
+import { SignInDto } from '../../domains/dtos/signIn.dto';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  @Roles(Role.BUYER)
+  async signInBuyer(dto: SignInDto): Promise<ApiResponse<UserResponse>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
+
+      if (!user)
+        return ApiResponse.error(`User with ${dto.email} is not found`);
+
+      // Check password
+      const isValid = await bcrypt.compare(dto.password, user.password);
+
+      if (!isValid) {
+        return ApiResponse.error('Invalid password', 403);
+      }
+
+      // Generate JWT token
+      const token = await this.jwtService.signAsync({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      return ApiResponse.success(
+        'User registered succesfully',
+        new UserResponse({
+          name: user.name,
+          email: user.email,
+          token,
+          id: user.id,
+        }),
+      );
+    } catch (error) {
+      return ApiResponse.error('Unexpected error');
+    }
+  }
+
   async signUpBuyer(dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
     try {
       const existingUser = await this.prisma.user.findUnique({
@@ -49,10 +84,10 @@ export class UserRepository implements UserRepositoryInterface {
           name: newUser.name,
           email: newUser.email,
           token,
+          id: newUser.id,
         }),
       );
     } catch (err) {
-      console.log(err);
       return ApiResponse.error('Unexpected error');
     }
   }
