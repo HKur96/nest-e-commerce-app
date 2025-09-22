@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or your DB of choice
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SELLER
+  BUYER
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String?
+  password  String
+  role      Role      @default(BUYER)
+  orders    Order[]
+  cart      Cart?
+  addresses Address[]
+  reviews   Review[]
+  wishlist  Wishlist?
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id            Int            @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  category      Category       @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  reviews       Review[]
+  stock         Stock?
+  discount      Discount?      @relation(fields: [discountId], references: [id])
+  discountId    Int?
+  createdAt     DateTime       @default(now())
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
+}
+
+model Stock {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int      @unique
+  quantity  Int
+  updatedAt DateTime @updatedAt
+}
+
+model Discount {
+  id         Int       @id @default(autoincrement())
+  code       String    @unique
+  percentage Float // e.g., 10.0 for 10% off
+  active     Boolean   @default(true)
+  expiresAt  DateTime?
+  products   Product[]
+  createdAt  DateTime  @default(now())
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    Int
+  items     OrderItem[]
+  total     Float
+  status    OrderStatus @default(PENDING)
+  shipment  Shipment?
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+  price     Float // snapshot of product price at time of order
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    Int        @unique
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  cartId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+}
+
+model Address {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  street  String
+  zipCode String
+  country String // optional if using Country table
+
+  ward   Ward @relation(fields: [wardId], references: [id])
+  wardId Int
+
+  createdAt DateTime @default(now())
+}
+
+model Ward {
+  id            Int         @id @default(autoincrement())
+  name          String
+  subdistrict   Subdistrict @relation(fields: [subdistrictId], references: [id])
+  subdistrictId Int
+  addresses     Address[]
+
+  @@unique([name, subdistrictId])
+}
+
+model Subdistrict {
+  id     Int    @id @default(autoincrement())
+  name   String
+  city   City   @relation(fields: [cityId], references: [id])
+  cityId Int
+  wards  Ward[]
+
+  @@unique([name, cityId])
+}
+
+model City {
+  id           Int           @id @default(autoincrement())
+  name         String
+  province     Province      @relation(fields: [provinceId], references: [id])
+  provinceId   Int
+  subdistricts Subdistrict[]
+
+  @@unique([name, provinceId])
+}
+
+model Province {
+  id      Int    @id @default(autoincrement())
+  name    String
+  state   State  @relation(fields: [stateId], references: [id])
+  stateId Int
+  cities  City[]
+
+  @@unique([name, stateId])
+}
+
+model State {
+  id        Int        @id @default(autoincrement())
+  name      String
+  code      String     @unique
+  provinces Province[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Wishlist {
+  id        Int            @id @default(autoincrement())
+  user      User           @relation(fields: [userId], references: [id])
+  userId    Int            @unique
+  items     WishlistItem[]
+  updatedAt DateTime       @updatedAt
+}
+
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  wishlistId Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+}
+
+model Shipment {
+  id           Int            @id @default(autoincrement())
+  order        Order          @relation(fields: [orderId], references: [id])
+  orderId      Int            @unique
+  trackingCode String?
+  carrier      String?
+  shippedAt    DateTime?
+  deliveredAt  DateTime?
+  status       ShipmentStatus @default(PREPARING)
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ShipmentStatus {
+  PREPARING
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+}
