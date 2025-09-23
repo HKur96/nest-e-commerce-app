@@ -47,7 +47,7 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('Authorization token missing');
       }
 
-      const decoded = (await this.decodeToken(token)) as UserData;
+      const decoded = await this.decodeToken(token);
 
       const user = await this.prismaService.user.findUnique({
         where: {
@@ -65,9 +65,9 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private async decodeToken(token: string) {
+  private async decodeToken(token: string): Promise<UserData> {
     try {
-      return await this.jwtService.verifyAsync(token);
+      return (await this.jwtService.verifyAsync(token)) as UserData;
     } catch (error) {
       if (error instanceof TokenExpiredError) {
         throw new UnauthorizedException('Token expired');

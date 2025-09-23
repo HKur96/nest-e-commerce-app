@@ -16,8 +16,4 @@ export class SignInDto {
   @IsString()
   @MinLength(8)
   password: string;
-
-  @IsNotEmpty()
-  @IsEnum(Role, { message: 'role must be either ADMIN, SELLER, or BUYER' })
-  role: Role;
 }

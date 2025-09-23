@@ -4,11 +4,13 @@ import { PrismaModule } from './infra/config/prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AddressModule } from './features/address/address.module';
+import { ProductModule } from './features/product/product.module';
 
 @Module({
   imports: [
     UserModule,
     AddressModule,
+    ProductModule,
     PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true,
