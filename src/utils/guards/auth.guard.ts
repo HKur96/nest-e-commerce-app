@@ -1,8 +1,14 @@
-import { PrismaService } from "@/infra/config/prisma/prisma.service";
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { JwtService } from "@nestjs/jwt";
-import { UserData } from "../decorators/user.decorator";
+import { PrismaService } from '@/infra/config/prisma/prisma.service';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { UserData } from '../decorators/user.decorator';
+import { TokenExpiredError } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,6 +24,7 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    // check whether roles is set
     if (!roles?.length) {
       return true;
     }
@@ -62,6 +69,9 @@ export class AuthGuard implements CanActivate {
     try {
       return await this.jwtService.verifyAsync(token);
     } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Token expired');
+      }
       throw new UnauthorizedException('Invalid token');
     }
   }

@@ -7,10 +7,121 @@ import { ProvinceDto } from '../../domains/dtos/province.dto';
 import { CityDto } from '../../domains/dtos/city.dto';
 import { SubDistrictDto } from '../../domains/dtos/subdistrict.dto';
 import { WardDto } from '../../domains/dtos/ward.dto';
+import { AddressResponse } from '../../domains/responses/address.response';
 
 @Injectable()
 export class AddressRepository implements AddressRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getAllStates(): Promise<ApiResponse<AddressResponse[]>> {
+    try {
+      const states = await this.prisma.state.findMany();
+
+      return ApiResponse.success(
+        'success',
+        states.map((state) => {
+          return new AddressResponse(state.id, state.name);
+        }),
+      );
+    } catch (error) {
+      throw ApiResponse.error('Unhandle exception');
+    }
+  }
+
+  async getAllProvinces(
+    stateId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    try {
+      const provinces = await this.prisma.province.findMany({
+        where: {
+          stateId,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+
+      return ApiResponse.success(
+        'success',
+        provinces.map((province) => {
+          return new AddressResponse(province.id, province.name);
+        }),
+      );
+    } catch (error) {
+      throw ApiResponse.error('Unhandle exception');
+    }
+  }
+
+  async getAllSubdistricts(
+    cityId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    try {
+      const subdistricts = await this.prisma.subdistrict.findMany({
+        where: {
+          cityId,
+        },
+        orderBy: { name: 'asc' },
+      });
+
+      return ApiResponse.success(
+        'success',
+        subdistricts.map((subdistrict) => {
+          return new AddressResponse(subdistrict.id, subdistrict.name);
+        }),
+      );
+    } catch (error) {
+      throw ApiResponse.error('Unhandle exception');
+    }
+  }
+
+  async getAllWards(
+    subdistrictId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    try {
+      const wards = await this.prisma.ward.findMany({
+        where: {
+          subdistrictId,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+
+      return ApiResponse.success(
+        'success',
+        wards.map((ward) => {
+          return new AddressResponse(ward.id, ward.name);
+        }),
+      );
+    } catch (error) {
+      throw ApiResponse.error('Unhandle exception');
+    }
+  }
+
+  async getAllCities(
+    provinceId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    try {
+      const cities = await this.prisma.city.findMany({
+        where: {
+          provinceId,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+
+      return ApiResponse.success(
+        'success',
+        cities.map((city) => {
+          console.log('lalala ', city);
+          return new AddressResponse(city.id, city.name);
+        }),
+      );
+    } catch (error) {
+      throw ApiResponse.error('Unhandle exception');
+    }
+  }
 
   async createWard(dtos: WardDto[]): Promise<ApiResponse<boolean>> {
     try {

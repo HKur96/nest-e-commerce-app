@@ -4,6 +4,7 @@ import { ProvinceDto } from '../dtos/province.dto';
 import { CityDto } from '../dtos/city.dto';
 import { SubDistrictDto } from '../dtos/subdistrict.dto';
 import { WardDto } from '../dtos/ward.dto';
+import { AddressResponse } from '../responses/address.response';
 
 export interface AddressRepositoryInterface {
   upsertFullLocation(): Promise<ApiResponse>;
@@ -17,4 +18,14 @@ export interface AddressRepositoryInterface {
   createSubdistrict(dtos: SubDistrictDto[]): Promise<ApiResponse<boolean>>;
 
   createWard(dtos: WardDto[]): Promise<ApiResponse<boolean>>;
+
+  getAllStates(): Promise<ApiResponse<AddressResponse[]>>;
+
+  getAllProvinces(stateId: number): Promise<ApiResponse<AddressResponse[]>>;
+
+  getAllCities(provinceId: number): Promise<ApiResponse<AddressResponse[]>>;
+
+  getAllSubdistricts(cityId: number): Promise<ApiResponse<AddressResponse[]>>;
+
+  getAllWards(subdistrictId: number): Promise<ApiResponse<AddressResponse[]>>;
 }

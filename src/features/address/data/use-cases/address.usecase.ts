@@ -6,6 +6,7 @@ import { ProvinceDto } from '../../domains/dtos/province.dto';
 import { CityDto } from '../../domains/dtos/city.dto';
 import { SubDistrictDto } from '../../domains/dtos/subdistrict.dto';
 import { WardDto } from '../../domains/dtos/ward.dto';
+import { AddressResponse } from '../../domains/responses/address.response';
 
 @Injectable()
 export class AddressUseCase {
@@ -31,5 +32,33 @@ export class AddressUseCase {
 
   async createWard(dtos: WardDto[]): Promise<ApiResponse<boolean>> {
     return this.addressRepository.createWard(dtos);
+  }
+
+  async getAllStates(): Promise<ApiResponse<AddressResponse[]>> {
+    return this.addressRepository.getAllStates();
+  }
+
+  async getAllProvinces(
+    stateId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    return this.addressRepository.getAllProvinces(stateId);
+  }
+
+  async getAllCities(
+    provinceId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    return this.addressRepository.getAllCities(provinceId);
+  }
+
+  async getSubdistrict(
+    cityId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    return this.addressRepository.getAllSubdistricts(cityId);
+  }
+
+  async getWards(
+    subdistrictId: number,
+  ): Promise<ApiResponse<AddressResponse[]>> {
+    return this.addressRepository.getAllWards(subdistrictId);
   }
 }
