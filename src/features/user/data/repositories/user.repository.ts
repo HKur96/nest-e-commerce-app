@@ -8,12 +8,16 @@ import { ApiResponse } from '@/utils/response/api.response';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from '../../domains/dtos/signIn.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async signInBuyer(dto: SignInDto): Promise<ApiResponse<UserResponse>> {
+  async signIn(
+    role: Role,
+    dto: SignInDto,
+  ): Promise<ApiResponse<UserResponse>> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -33,7 +37,7 @@ export class UserRepository implements UserRepositoryInterface {
       const token = await this.jwtService.signAsync({
         id: user.id,
         email: user.email,
-        role: user.role,
+        role,
       });
 
       return ApiResponse.success(
@@ -50,7 +54,10 @@ export class UserRepository implements UserRepositoryInterface {
     }
   }
 
-  async signUpBuyer(dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
+  async signUp(
+    role: Role,
+    dto: SignUpDto,
+  ): Promise<ApiResponse<UserResponse>> {
     try {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -67,7 +74,7 @@ export class UserRepository implements UserRepositoryInterface {
           name: dto.name,
           email: dto.email,
           password: hashedPassword,
-          role: dto.role,
+          role: role,
         },
       });
 
