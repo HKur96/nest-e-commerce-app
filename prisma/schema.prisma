@@ -25,6 +25,8 @@ model User {
   reviews   Review[]
   wishlist  Wishlist?
   createdAt DateTime  @default(now())
+
+  products  Product[] // A seller can have many products
 }
 
 model Product {
@@ -42,6 +44,9 @@ model Product {
   cartItems     CartItem[]
   orderItems    OrderItem[]
   wishlistItems WishlistItem[]
+
+  seller        User           @relation(fields: [sellerId], references: [id])
+  sellerId      Int
 }
 
 model Stock {
