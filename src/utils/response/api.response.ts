@@ -4,6 +4,8 @@ export class ApiResponse<T = any> {
     message: string;
     status_code: number;
     timestamp: string;
+    page?: number;
+    total_page?: number;
   };
   data?: T;
 
@@ -13,6 +15,8 @@ export class ApiResponse<T = any> {
       data?: T;
       success?: boolean;
       status_code?: number;
+      page?: number;
+      total_page?: number;
     } = {},
   ) {
     this.data = options.data || null;
@@ -22,10 +26,30 @@ export class ApiResponse<T = any> {
       status_code: options.status_code ?? 200,
       timestamp: new Date().toISOString(),
     };
+
+    if (options.page !== undefined && options.page !== null) {
+      this.meta.page = options.page;
+    }
+
+    if (options.total_page !== undefined && options.total_page !== null) {
+      this.meta.total_page = options.total_page;
+    }
   }
 
-  static success<T>(message: string, data?: T, status_code = 200) {
-    return new ApiResponse<T>(message, { data, success: true, status_code });
+  static success<T>(
+    message: string,
+    data?: T,
+    status_code = 200,
+    page?: number,
+    total_page?: number,
+  ) {
+    return new ApiResponse<T>(message, {
+      data,
+      success: true,
+      status_code,
+      page,
+      total_page,
+    });
   }
 
   static error(message: string, status_code = 400) {

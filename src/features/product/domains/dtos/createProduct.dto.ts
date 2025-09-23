@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -5,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -37,12 +39,23 @@ export class CreateProductDto {
   discountId?: number;
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Image)
   images: Image[];
 }
 
 export class Image {
+  @IsNotEmpty()
+  @IsString()
   url: string;
+
+  @IsOptional()
   altText?: string;
+
+  @IsNotEmpty()
+  @IsNumber()
   position: number;
-  isThumbnail?: boolean;
+
+  @IsOptional()
+  isThumbnail?: boolean = true;
 }

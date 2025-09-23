@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
 import { ApiResponse } from '@/utils/response/api.response';
 import { ProductResponse } from '../../domains/responses/product.response';
+import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
 
 @Injectable()
 export class ProductUseCase {
@@ -14,5 +15,9 @@ export class ProductUseCase {
     dto: CreateProductDto,
   ): Promise<ApiResponse<ProductResponse>> {
     return this.productRepository.createProduct(role, dto);
+  }
+
+  async searchProduct(dto: SearchProductDto) : Promise<ApiResponse<ProductResponse[]>> {
+    return this.productRepository.searchProduct(dto)
   }
 }
