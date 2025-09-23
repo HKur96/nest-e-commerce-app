@@ -14,17 +14,19 @@ import { Role } from '@prisma/client';
 export class UserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async signIn(
-    role: Role,
-    dto: SignInDto,
-  ): Promise<ApiResponse<UserResponse>> {
+  async signIn(role: Role, dto: SignInDto): Promise<ApiResponse<UserResponse>> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { email: dto.email },
       });
 
-      if (!user)
+      if (user.role !== role) {
+        return ApiResponse.error('Unauthorized', 401)
+      }
+
+      if (!user) {
         return ApiResponse.error(`User with ${dto.email} is not found`);
+      }
 
       // Check password
       const isValid = await bcrypt.compare(dto.password, user.password);
@@ -43,10 +45,10 @@ export class UserRepository implements UserRepositoryInterface {
       return ApiResponse.success(
         'User registered succesfully',
         new UserResponse({
+          id: user.id,
           name: user.name,
           email: user.email,
           token,
-          id: user.id,
         }),
       );
     } catch (error) {
@@ -54,10 +56,7 @@ export class UserRepository implements UserRepositoryInterface {
     }
   }
 
-  async signUp(
-    role: Role,
-    dto: SignUpDto,
-  ): Promise<ApiResponse<UserResponse>> {
+  async signUp(role: Role, dto: SignUpDto): Promise<ApiResponse<UserResponse>> {
     try {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -88,10 +87,10 @@ export class UserRepository implements UserRepositoryInterface {
       return ApiResponse.success(
         'User registered succesfully',
         new UserResponse({
+          id: newUser.id,
           name: newUser.name,
           email: newUser.email,
           token,
-          id: newUser.id,
         }),
       );
     } catch (err) {

@@ -1,8 +1,13 @@
-import { PrismaService } from "@/infra/config/prisma/prisma.service";
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { JwtService } from "@nestjs/jwt";
-import { UserData } from "../decorators/user.decorator";
+import { PrismaService } from '@/infra/config/prisma/prisma.service';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { UserData } from '../decorators/user.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -40,7 +45,7 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('Authorization token missing');
       }
 
-      const decoded = (await this.decodeToken(token)) as UserData;
+      const decoded = await this.decodeToken(token);
 
       const user = await this.prismaService.user.findUnique({
         where: {
@@ -58,9 +63,9 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private async decodeToken(token: string) {
+  private async decodeToken(token: string): Promise<UserData> {
     try {
-      return await this.jwtService.verifyAsync(token);
+      return (await this.jwtService.verifyAsync(token)) as UserData;
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
