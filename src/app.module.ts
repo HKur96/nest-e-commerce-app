@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AddressModule } from './features/address/address.module';
 import { ProductModule } from './features/product/product.module';
 import { WishlistModule } from './features/wishlist/wishlist.module';
+import { CartModule } from './features/cart/cart.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { WishlistModule } from './features/wishlist/wishlist.module';
     AddressModule,
     ProductModule,
     WishlistModule,
+    CartModule,
     PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true,
