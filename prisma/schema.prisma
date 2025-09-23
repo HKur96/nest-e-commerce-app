@@ -26,7 +26,7 @@ model User {
   wishlist  Wishlist?
   createdAt DateTime  @default(now())
 
-  products  Product[] // A seller can have many products
+  products Product[] // A seller can have many products
 }
 
 model Product {
@@ -45,8 +45,23 @@ model Product {
   orderItems    OrderItem[]
   wishlistItems WishlistItem[]
 
-  seller        User           @relation(fields: [sellerId], references: [id])
-  sellerId      Int
+  seller   User @relation(fields: [sellerId], references: [id])
+  sellerId Int
+
+  images ProductImage[]
+}
+
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+  url         String
+  altText     String?
+  position    Int // 🔢 For ordering images (e.g. 0 = first)
+  isThumbnail Boolean  @default(false) // ⭐ True if this is the main/featured image
+  product     Product  @relation(fields: [productId], references: [id])
+  productId   Int
+  createdAt   DateTime @default(now())
+
+  @@unique([productId, position]) // Prevent duplicate positions for the same product
 }
 
 model Stock {
