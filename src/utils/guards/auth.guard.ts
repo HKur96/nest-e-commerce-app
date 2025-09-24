@@ -55,13 +55,24 @@ export class AuthGuard implements CanActivate {
         },
       });
 
-      if (user?.role && !roles.includes(user?.role)) return false;
+      if (user?.role && !roles.includes(user?.role)) {
+        throw new UnauthorizedException(
+          `You don't have permission to make this request`,
+        );
+      }
 
       request.user = decoded;
 
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Unauthorized');
+      switch (error.response.error) {
+        case 'TokenExpired':
+          throw new UnauthorizedException(error.response.message);
+        case 'Unauthorized':
+          throw new UnauthorizedException(error.response.message);
+        default:
+          throw new UnauthorizedException('Unauthorized');
+      }
     }
   }
 

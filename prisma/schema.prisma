@@ -196,6 +196,7 @@ model Review {
   productId Int
   rating    Int
   comment   String?
+  url       String?
   createdAt DateTime @default(now())
 }
 

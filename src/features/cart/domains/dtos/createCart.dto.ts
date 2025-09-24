@@ -11,5 +11,6 @@ export class AddToCart {
   @Type(() => Number) // Converts the string parameter to a number
   @IsInt()
   product_id: number;
+  
   quantity = 1;
 }

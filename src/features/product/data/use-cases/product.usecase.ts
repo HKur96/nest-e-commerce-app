@@ -5,6 +5,8 @@ import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
 import { ApiResponse } from '@/utils/response/api.response';
 import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
+import { CreateReviewDto } from '../../domains/dtos/createReview.dto';
+import { ReviewResponse } from '../../domains/responses/review.response';
 
 @Injectable()
 export class ProductUseCase {
@@ -17,7 +19,17 @@ export class ProductUseCase {
     return this.productRepository.createProduct(role, dto);
   }
 
-  async searchProduct(dto: SearchProductDto) : Promise<ApiResponse<ProductResponse[]>> {
-    return this.productRepository.searchProduct(dto)
+  async searchProduct(
+    dto: SearchProductDto,
+  ): Promise<ApiResponse<ProductResponse[]>> {
+    return this.productRepository.searchProduct(dto);
+  }
+
+  async createReview(dto: CreateReviewDto): Promise<ApiResponse<boolean>> {
+    return this.productRepository.createReview(dto);
+  }
+
+  async getProductReviewById(productId: number): Promise<ApiResponse<ReviewResponse[]>> {
+    return this.productRepository.getProductReviewById(productId);
   }
 }

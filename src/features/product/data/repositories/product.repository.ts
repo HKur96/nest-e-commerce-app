@@ -6,10 +6,92 @@ import { PrismaService } from '@/infra/config/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
+import { CreateReviewDto } from '../../domains/dtos/createReview.dto';
+import { ReviewResponse } from '../../domains/responses/review.response';
 
 @Injectable()
 export class ProductRepository implements ProductRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getProductReviewById(
+    productId: number,
+  ): Promise<ApiResponse<ReviewResponse[]>> {
+    try {
+      const reviews = await this.prisma.review.findMany({
+        where: { productId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      if (!reviews.length) {
+        return ApiResponse.error('Review is empty', 404);
+      }
+
+      return ApiResponse.success(
+        'Success get review',
+        reviews.map((review) => {
+          return new ReviewResponse({
+            rating: review.rating,
+            comment: review.comment,
+            image_url: review.url ?? '',
+            username: review.user.name,
+            created_at: review.createdAt.toISOString(),
+          });
+        }),
+      );
+    } catch (error) {
+      return ApiResponse.error('Unexpected error');
+    }
+  }
+
+  async createReview({
+    user_id,
+    product_id,
+    rating,
+    comment,
+    image_url,
+  }: CreateReviewDto): Promise<ApiResponse<boolean>> {
+    try {
+      // Optional: Validate if user already reviewed this product
+      const existingReview = await this.prisma.review.findFirst({
+        where: {
+          userId: user_id,
+          productId: product_id,
+        },
+      });
+
+      if (existingReview) {
+        throw new Error('User has already reviewed this product.');
+      }
+
+      const review = await this.prisma.review.create({
+        data: {
+          userId: user_id,
+          productId: product_id,
+          rating,
+          comment,
+          url: image_url,
+        },
+      });
+
+      return ApiResponse.success(
+        'Success create review',
+        review !== null && review !== undefined,
+      );
+    } catch (error) {
+      return ApiResponse.error('Unexpected error');
+    }
+  }
+
   async searchProduct({
     name,
     sortBy,
