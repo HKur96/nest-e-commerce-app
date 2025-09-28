@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   UseGuards,
@@ -22,6 +23,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CategoryResponse } from '../../domains/responses/category.response';
+import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
 
 @ApiTags('Product')
 @Controller('product')
@@ -73,5 +75,18 @@ export class ProductController {
   @Get('/category')
   getAllCategories(): Promise<ApiResponseDto<CategoryResponse[]>> {
     return this.productUseCase.getAllCategories();
+  }
+
+  @ApiCreatedResponse({ description: 'Detail product successfully got' })
+  @ApiResponse({
+    status: 200,
+    description: 'Detail product successfully got',
+    type: DetailProductResponse,
+  })
+  @Get('/:id')
+  getDetailProduct(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponseDto<DetailProductResponse>> {
+    return this.productUseCase.getDetailProduct(id);
   }
 }
