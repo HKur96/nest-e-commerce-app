@@ -65,9 +65,3 @@ npm run seed
 ```bash
 npm run start:dev
 ```
-
----
-
-📜 License
-
-MIT © 2025 Hari Kurniawan
