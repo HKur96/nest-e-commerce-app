@@ -1,29 +1,33 @@
-import { IsIn, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class SearchProductDto {
-  // @IsOptional()
-  // @IsString()
-  // name?: string;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  page = 1;
 
-  // @IsOptional()
-  // @IsIn(['price', 'rating'])
-  // sortBy?: 'price' | 'rating';
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  pageSize = 10;
 
-  // @IsOptional()
-  // @IsIn(['asc', 'desc'])
-  // sortOrder?: 'asc' | 'desc';
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  search?: string;
 
-  // @IsOptional()
-  // @IsNumberString()
-  // page?: string; // Can be parsed into number later
+  @IsOptional()
+  @IsIn(['price', 'review'])
+  sortBy: 'price' | 'review' = 'price';
 
-  // @IsOptional()
-  // @IsNumberString()
-  // pageSize?: string; // Same
-
-  page?: number;
-  pageSize?: number;
-  sortOrder?: 'asc' | 'desc';
-  keyword?: string;
-  categoryId?: number;
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  sortOrder: 'asc' | 'desc' = 'asc';
 }

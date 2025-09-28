@@ -1,25 +1,31 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export class ProductResponse {
+  @ApiProperty()
   id: number;
+
+  @ApiProperty()
   name: string;
-  description: string | null;
+
+  @ApiProperty()
   price: number;
-  categoryId: number;
-  discountId: number | null;
-  createdAt: Date;
-  sellerId: number;
-  stock: number; // assuming this represents stock.quantity
+
+  @ApiProperty()
+  total_sold: number;
+
+  @ApiProperty()
+  seller_name: string;
+
+  @ApiProperty()
   images: string[] | null;
 
-  constructor(data: any) {
-    this.id = data.id;
-    this.name = data.name;
-    this.description = data.description ?? null;
-    this.price = data.price;
-    this.categoryId = data.categoryId;
-    this.discountId = data.discountId ?? null;
-    this.createdAt = new Date(data.createdAt);
-    this.sellerId = data.sellerId;
-    this.stock = data.stock?.quantity ?? 0;
-    this.images = data.images?.length ? data.images : null;
+  @ApiProperty()
+  avg_rating: number;
+
+  @ApiProperty()
+  is_official_store: boolean;
+
+  constructor(partial: Partial<ProductResponse>) {
+    Object.assign(this, partial);
   }
 }

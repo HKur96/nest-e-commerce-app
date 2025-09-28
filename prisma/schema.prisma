@@ -97,16 +97,18 @@ model User {
 }
 
 model Seller {
-  id         Int              @id @default(autoincrement())
-  userId     Int              @unique
-  user       User             @relation(fields: [userId], references: [id])
-  isOfficial Boolean          @default(false)
-  rate       Float            @default(0)
-  location   String?
-  products   Product[]
-  followers  SellerFollower[]
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  id             Int              @id @default(autoincrement())
+  userId         Int              @unique
+  user           User             @relation(fields: [userId], references: [id])
+  isOfficial     Boolean          @default(false)
+  rate           Float            @default(0)
+  detailLocation String?
+  products       Product[]
+  followers      SellerFollower[]
+  addressId      Int?
+  address        Address?         @relation(fields: [addressId], references: [id])
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model SellerFollower {
@@ -138,6 +140,7 @@ model Address {
   detail        String? // house number, RT/RW, etc.
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  Seller        Seller[]
 
   @@index([userId])
   @@index([provinceId])
@@ -150,6 +153,7 @@ model Category {
   id        Int        @id @default(autoincrement())
   name      String     @unique
   slug      String     @unique
+  iconUrl   String?
   parentId  Int?
   parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
   children  Category[] @relation("CategoryToCategory")
@@ -167,6 +171,7 @@ model Product {
   description  String
   price        Decimal             @db.Decimal(10, 2)
   stock        Int                 @default(0)
+  totalSold    Int                 @default(0)
   sellerId     Int
   categoryId   Int
   seller       Seller              @relation(fields: [sellerId], references: [id])
