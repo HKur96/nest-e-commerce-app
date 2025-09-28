@@ -1,60 +1,80 @@
-import { ApiResponse } from '@/utils/response/api.response';
+import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { AddressRepositoryInterface } from '../../domains/repositories/AddressRepositoryInterface';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/infra/config/prisma/prisma.service';
-import { StateDto } from '../../domains/dtos/state.dto';
 import { ProvinceDto } from '../../domains/dtos/province.dto';
 import { CityDto } from '../../domains/dtos/city.dto';
 import { SubDistrictDto } from '../../domains/dtos/subdistrict.dto';
 import { WardDto } from '../../domains/dtos/ward.dto';
 import { AddressResponse } from '../../domains/responses/address.response';
+import { UserData } from '@/utils/decorators/user.decorator';
+import { UserAddress } from '../../domains/responses/userAddress.response';
 
 @Injectable()
 export class AddressRepository implements AddressRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllStates(): Promise<ApiResponse<AddressResponse[]>> {
+  async getUserAddress(user: UserData): Promise<ApiResponseDto<UserAddress[]>> {
     try {
-      const states = await this.prisma.state.findMany();
+      console.log('ppp', user.id)
+      const addresses = await this.prisma.address.findMany({
+        where: { userId: user.id },
+        include: {
+          province: { select: { name: true } },
+          city: { select: { name: true } },
+          subdistrict: { select: { name: true } },
+          ward: { select: { name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
 
-      return ApiResponse.success(
-        'success',
-        states.map((state) => {
-          return new AddressResponse(state.id, state.name);
-        }),
+      if (!addresses.length) {
+        return ApiResponseDto.error('Address not found');
+      }
+
+      return ApiResponseDto.success(
+        'Address successfully got',
+        addresses.map<UserAddress>(
+          (address) =>
+            new UserAddress({
+              id: address.id,
+              street_name: address.streetName,
+              ward_name: address.ward.name,
+              subdistrict_name: address.subdistrict.name,
+              city_name: address.city.name,
+              province_name: address.province.name,
+            }),
+        ),
       );
     } catch (error) {
-      throw ApiResponse.error('Unhandle exception');
+      return ApiResponseDto.error('Unexpected error');
     }
   }
 
   async getAllProvinces(
     stateId: number,
-  ): Promise<ApiResponse<AddressResponse[]>> {
+  ): Promise<ApiResponseDto<AddressResponse[]>> {
     try {
       const provinces = await this.prisma.province.findMany({
-        where: {
-          stateId,
-        },
         orderBy: {
           name: 'asc',
         },
       });
 
-      return ApiResponse.success(
+      return ApiResponseDto.success(
         'success',
         provinces.map((province) => {
           return new AddressResponse(province.id, province.name);
         }),
       );
     } catch (error) {
-      throw ApiResponse.error('Unhandle exception');
+      throw ApiResponseDto.error('Unhandle exception');
     }
   }
 
   async getAllSubdistricts(
     cityId: number,
-  ): Promise<ApiResponse<AddressResponse[]>> {
+  ): Promise<ApiResponseDto<AddressResponse[]>> {
     try {
       const subdistricts = await this.prisma.subdistrict.findMany({
         where: {
@@ -63,20 +83,20 @@ export class AddressRepository implements AddressRepositoryInterface {
         orderBy: { name: 'asc' },
       });
 
-      return ApiResponse.success(
+      return ApiResponseDto.success(
         'success',
         subdistricts.map((subdistrict) => {
           return new AddressResponse(subdistrict.id, subdistrict.name);
         }),
       );
     } catch (error) {
-      throw ApiResponse.error('Unhandle exception');
+      throw ApiResponseDto.error('Unhandle exception');
     }
   }
 
   async getAllWards(
     subdistrictId: number,
-  ): Promise<ApiResponse<AddressResponse[]>> {
+  ): Promise<ApiResponseDto<AddressResponse[]>> {
     try {
       const wards = await this.prisma.ward.findMany({
         where: {
@@ -87,20 +107,20 @@ export class AddressRepository implements AddressRepositoryInterface {
         },
       });
 
-      return ApiResponse.success(
+      return ApiResponseDto.success(
         'success',
         wards.map((ward) => {
           return new AddressResponse(ward.id, ward.name);
         }),
       );
     } catch (error) {
-      throw ApiResponse.error('Unhandle exception');
+      throw ApiResponseDto.error('Unhandle exception');
     }
   }
 
   async getAllCities(
     provinceId: number,
-  ): Promise<ApiResponse<AddressResponse[]>> {
+  ): Promise<ApiResponseDto<AddressResponse[]>> {
     try {
       const cities = await this.prisma.city.findMany({
         where: {
@@ -111,7 +131,7 @@ export class AddressRepository implements AddressRepositoryInterface {
         },
       });
 
-      return ApiResponse.success(
+      return ApiResponseDto.success(
         'success',
         cities.map((city) => {
           console.log('lalala ', city);
@@ -119,14 +139,14 @@ export class AddressRepository implements AddressRepositoryInterface {
         }),
       );
     } catch (error) {
-      throw ApiResponse.error('Unhandle exception');
+      throw ApiResponseDto.error('Unhandle exception');
     }
   }
 
-  async createWard(dtos: WardDto[]): Promise<ApiResponse<boolean>> {
+  async createWard(dtos: WardDto[]): Promise<ApiResponseDto<boolean>> {
     try {
       if (!dtos.length) {
-        return ApiResponse.error('Data should not be empty', 401);
+        return ApiResponseDto.error('Data should not be empty', 401);
       }
 
       await this.prisma.ward.createMany({
@@ -139,17 +159,17 @@ export class AddressRepository implements AddressRepositoryInterface {
         }),
       });
 
-      return ApiResponse.success('Create a ward successfully', true);
+      return ApiResponseDto.success('Create a ward successfully', true);
     } catch (error) {
-      throw ApiResponse.error('Unhandled exception');
+      throw ApiResponseDto.error('Unhandled exception');
     }
   }
   async createSubdistrict(
     dtos: SubDistrictDto[],
-  ): Promise<ApiResponse<boolean>> {
+  ): Promise<ApiResponseDto<boolean>> {
     try {
       if (!dtos.length) {
-        return ApiResponse.error('Data should not be empty', 401);
+        return ApiResponseDto.error('Data should not be empty', 401);
       }
 
       await this.prisma.subdistrict.createMany({
@@ -162,16 +182,16 @@ export class AddressRepository implements AddressRepositoryInterface {
         }),
       });
 
-      return ApiResponse.success('Create a subdistrict successfully', true);
+      return ApiResponseDto.success('Create a subdistrict successfully', true);
     } catch (error) {
-      throw ApiResponse.error('Unhandled exception');
+      throw ApiResponseDto.error('Unhandled exception');
     }
   }
 
-  async createCity(dtos: CityDto[]): Promise<ApiResponse<boolean>> {
+  async createCity(dtos: CityDto[]): Promise<ApiResponseDto<boolean>> {
     try {
       if (!dtos.length) {
-        return ApiResponse.error('Data should not be empty', 401);
+        return ApiResponseDto.error('Data should not be empty', 401);
       }
 
       await this.prisma.city.createMany({
@@ -184,58 +204,31 @@ export class AddressRepository implements AddressRepositoryInterface {
         }),
       });
 
-      return ApiResponse.success('Create a city successfully', true);
+      return ApiResponseDto.success('Create a city successfully', true);
     } catch (error) {
-      throw ApiResponse.error('Unhandled exception');
+      throw ApiResponseDto.error('Unhandled exception');
     }
   }
 
-  async createProvince(dtos: ProvinceDto[]): Promise<ApiResponse<boolean>> {
+  async createProvince(dtos: ProvinceDto[]): Promise<ApiResponseDto<boolean>> {
     try {
       if (!dtos.length) {
-        return ApiResponse.error('Data should not be empty', 401);
+        return ApiResponseDto.error('Data should not be empty', 401);
       }
 
       await this.prisma.province.createMany({
         data: dtos.map((dto) => {
           return {
             name: dto.name,
-            stateId: dto.state_id,
           };
         }),
         skipDuplicates: true,
       });
 
-      return ApiResponse.success('Create a province successfully', true);
+      return ApiResponseDto.success('Create a province successfully', true);
     } catch (error) {
-      throw ApiResponse.error('Unhandled exception');
+      throw ApiResponseDto.error('Unhandled exception');
     }
-  }
-
-  async createState(dtos: StateDto[]): Promise<ApiResponse<boolean>> {
-    try {
-      if (!dtos.length) {
-        return ApiResponse.error('Data should not be empty', 401);
-      }
-
-      await this.prisma.state.createMany({
-        data: dtos.map((dto) => {
-          return {
-            name: dto.name,
-            code: dto.code,
-          };
-        }),
-        skipDuplicates: true,
-      });
-
-      return ApiResponse.success('Create a state successfully', true);
-    } catch (error) {
-      throw ApiResponse.error('Unhandled exception');
-    }
-  }
-
-  upsertFullLocation(): Promise<ApiResponse> {
-    throw new Error('Method not implemented.');
   }
 
   /**

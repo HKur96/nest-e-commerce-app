@@ -1,4 +1,4 @@
-export class ApiResponse<T = any> {
+export class ApiResponseDto<T = any> {
   meta: {
     success: boolean;
     message: string;
@@ -43,7 +43,7 @@ export class ApiResponse<T = any> {
     page?: number,
     total_page?: number,
   ) {
-    return new ApiResponse<T>(message, {
+    return new ApiResponseDto<T>(message, {
       data,
       success: true,
       status_code,
@@ -53,6 +53,6 @@ export class ApiResponse<T = any> {
   }
 
   static error(message: string, status_code = 400) {
-    return new ApiResponse(message, { success: false, status_code });
+    return new ApiResponseDto(message, { success: false, status_code });
   }
 }

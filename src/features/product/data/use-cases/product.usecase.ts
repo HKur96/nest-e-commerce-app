@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProductRepository } from '../repositories/product.repository';
 import { Role } from '@prisma/client';
 import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
-import { ApiResponse } from '@/utils/response/api.response';
+import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
 
@@ -13,11 +13,11 @@ export class ProductUseCase {
   async createProduct(
     role: Role,
     dto: CreateProductDto,
-  ): Promise<ApiResponse<ProductResponse>> {
+  ): Promise<ApiResponseDto<ProductResponse>> {
     return this.productRepository.createProduct(role, dto);
   }
 
-  async searchProduct(dto: SearchProductDto) : Promise<ApiResponse<ProductResponse[]>> {
+  async searchProduct(dto: SearchProductDto) : Promise<ApiResponseDto<ProductResponse[]>> {
     return this.productRepository.searchProduct(dto)
   }
 }

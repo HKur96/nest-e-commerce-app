@@ -4,9 +4,4 @@ export class ProvinceDto {
     @IsNotEmpty()
     @IsString()
     name: string;
-
-    @IsNotEmpty()
-    @IsNumber()
-    @IsPositive()
-    state_id: number;
 }

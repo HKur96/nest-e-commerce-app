@@ -1,31 +1,28 @@
-import { ApiResponse } from '@/utils/response/api.response';
-import { StateDto } from '../dtos/state.dto';
+import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { ProvinceDto } from '../dtos/province.dto';
 import { CityDto } from '../dtos/city.dto';
 import { SubDistrictDto } from '../dtos/subdistrict.dto';
 import { WardDto } from '../dtos/ward.dto';
 import { AddressResponse } from '../responses/address.response';
+import { UserData } from '@/utils/decorators/user.decorator';
+import { UserAddress } from '../responses/userAddress.response';
 
 export interface AddressRepositoryInterface {
-  upsertFullLocation(): Promise<ApiResponse>;
+  createProvince(dtos: ProvinceDto[]): Promise<ApiResponseDto<boolean>>;
 
-  createState(dto: StateDto[]): Promise<ApiResponse<boolean>>;
+  createCity(dtos: CityDto[]): Promise<ApiResponseDto<boolean>>;
 
-  createProvince(dtos: ProvinceDto[]): Promise<ApiResponse<boolean>>;
+  createSubdistrict(dtos: SubDistrictDto[]): Promise<ApiResponseDto<boolean>>;
 
-  createCity(dtos: CityDto[]): Promise<ApiResponse<boolean>>;
+  createWard(dtos: WardDto[]): Promise<ApiResponseDto<boolean>>;
 
-  createSubdistrict(dtos: SubDistrictDto[]): Promise<ApiResponse<boolean>>;
+  getAllProvinces(stateId: number): Promise<ApiResponseDto<AddressResponse[]>>;
 
-  createWard(dtos: WardDto[]): Promise<ApiResponse<boolean>>;
+  getAllCities(provinceId: number): Promise<ApiResponseDto<AddressResponse[]>>;
 
-  getAllStates(): Promise<ApiResponse<AddressResponse[]>>;
+  getAllSubdistricts(cityId: number): Promise<ApiResponseDto<AddressResponse[]>>;
 
-  getAllProvinces(stateId: number): Promise<ApiResponse<AddressResponse[]>>;
+  getAllWards(subdistrictId: number): Promise<ApiResponseDto<AddressResponse[]>>;
 
-  getAllCities(provinceId: number): Promise<ApiResponse<AddressResponse[]>>;
-
-  getAllSubdistricts(cityId: number): Promise<ApiResponse<AddressResponse[]>>;
-
-  getAllWards(subdistrictId: number): Promise<ApiResponse<AddressResponse[]>>;
+  getUserAddress(user: UserData): Promise<ApiResponseDto<UserAddress[]>>;
 }

@@ -1,5 +1,5 @@
-import { ApiResponse } from '@/utils/response/api.response';
-import { Role } from '@prisma/client';
+import { ApiResponseDto } from '@/utils/response/api.response.dto';
+import { Prisma, Role } from '@prisma/client';
 import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
 import { ProductRepositoryInterface } from '../../domains/repositories/ProductRepositoryInterface';
 import { PrismaService } from '@/infra/config/prisma/prisma.service';
@@ -11,132 +11,85 @@ import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
 export class ProductRepository implements ProductRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
   async searchProduct({
-    name,
-    sortBy,
+    keyword,
     sortOrder,
     page,
     pageSize,
-  }: SearchProductDto): Promise<ApiResponse<ProductResponse[]>> {
+    categoryId,
+  }: SearchProductDto): Promise<ApiResponseDto<ProductResponse[]>> {
     try {
       const safePage = Math.max(1, Number(page) || 1);
       const safePageSize = Math.max(1, Number(pageSize) || 10);
       const skip = (safePage - 1) * safePageSize;
 
-      const products = await this.prisma.product.findMany({
-        where: {
-          name: {
-            contains: name,
-            mode: 'insensitive',
+      const where: Prisma.ProductWhereInput = {};
+      if (keyword) {
+        where.name = { contains: keyword, mode: 'insensitive' };
+      }
+      if (categoryId) {
+        where.categoryId = categoryId;
+      }
+
+      const [products, total] = await this.prisma.$transaction([
+        this.prisma.product.findMany({
+          where,
+          skip,
+          take: safePageSize,
+          orderBy: { price: sortOrder === 'desc' ? 'desc' : 'asc' },
+          include: {
+            images: true,
+            seller: { select: { id: true, user: { select: { name: true } } } },
+            category: { select: { id: true, name: true } },
           },
-        },
-        include: {
-          reviews: true,
-          discount: true,
-          images: {
-            where: {
-              isThumbnail: true,
-            },
-            orderBy: {
-              position: 'asc',
-            },
-            take: 1,
-          },
-        },
-        skip,
-        take: safePageSize,
-      });
+        }),
+        this.prisma.product.count({ where }),
+      ]);
 
-      const totalCount = await this.prisma.product.count({
-        where: {
-          name: {
-            contains: name,
-            mode: 'insensitive',
-          },
-        },
-      });
-
-      const enriched = products.map((product) => {
-        const averageRating =
-          product.reviews.length > 0
-            ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
-              product.reviews.length
-            : 0;
-
-        return {
-          ...product,
-          averageRating,
-        };
-      });
-
-      const sorted = enriched.sort((a, b) => {
-        if (sortBy === 'price') {
-          return sortOrder === 'asc' ? a.price - b.price : b.price - a.price;
-        } else {
-          return sortOrder === 'asc'
-            ? a.averageRating - b.averageRating
-            : b.averageRating - a.averageRating;
-        }
-      });
-
-      return ApiResponse.success(
-        'Success search product',
-        sorted.map((sort) => {
-          return new ProductResponse(sort);
+      return ApiResponseDto.success(
+        'Product successfully got',
+        products.map<ProductResponse>((product) => {
+          return new ProductResponse(product);
         }),
         200,
         safePage,
-        Math.ceil(totalCount / safePageSize),
+        Math.ceil(total / safePageSize),
       );
     } catch (error) {
-      return ApiResponse.error('Unexpected error');
+      console.error('searchProduct error:', error);
+      return ApiResponseDto.error('Unexpected error');
     }
   }
 
   async createProduct(
     role: Role,
-    {
-      sellerId,
-      name,
-      description,
-      price,
-      categoryId,
-      discountId,
-      stockQuantity,
-      images,
-    }: CreateProductDto,
-  ): Promise<ApiResponse<ProductResponse>> {
+    { price, images, variants, ...productData }: CreateProductDto,
+  ): Promise<ApiResponseDto<ProductResponse>> {
     try {
       const product = await this.prisma.product.create({
         data: {
-          sellerId,
-          name,
-          description,
-          price,
-          categoryId,
-          discountId,
-          stock: {
-            create: {
-              quantity: stockQuantity,
-            },
-          },
-          images: images?.length
+          ...productData,
+          price: new Prisma.Decimal(price),
+          images: images
+            ? { create: images.map((url) => ({ url })) }
+            : undefined,
+          variants: variants
             ? {
-                create: images,
+                create: variants.map((v) => ({ name: v.name, value: v.value })),
               }
             : undefined,
         },
         include: {
-          stock: true,
           images: true,
+          variants: true,
         },
       });
 
-      return ApiResponse.success(
-        'Create product succesfully',
+      return ApiResponseDto.success(
+        'Product successfully created',
         new ProductResponse(product),
       );
-    } catch (error) {
-      return ApiResponse.error('Unexpected error');
+    } catch (err) {
+      return ApiResponseDto.error('Unexpected error');
     }
   }
 }

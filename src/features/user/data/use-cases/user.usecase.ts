@@ -2,25 +2,35 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 import { UserResponse } from '@/features/user/domains/responses/user.response';
 import { SignUpDto } from '@/features/user/domains/dtos/signUp.dto';
-import { ApiResponse } from '@/utils/response/api.response';
+import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { SignInDto } from '../../domains/dtos/signIn.dto';
-import { Role } from '@prisma/client';
+import { UpdateUserDto } from '../../domains/dtos/updateUser.dto';
+import { UserData } from '@/utils/decorators/user.decorator';
+import { UpsertAddressDto } from '../../domains/dtos/upsertAddress.dto';
 
 @Injectable()
 export class UserUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async signUp(
-    role: Role,
-    dto: SignUpDto,
-  ): Promise<ApiResponse<UserResponse>> {
-    return await this.userRepository.signUp(role, dto);
+  async signUp(dto: SignUpDto): Promise<ApiResponseDto<UserResponse>> {
+    return await this.userRepository.signUp(dto);
   }
 
-  async signIn(
-    role: Role,
-    dto: SignInDto,
-  ): Promise<ApiResponse<UserResponse>> {
-    return await this.userRepository.signIn(role, dto);
+  async signIn(dto: SignInDto): Promise<ApiResponseDto<UserResponse>> {
+    return await this.userRepository.signIn(dto);
+  }
+
+  async updateUserCore(
+    dto: UpdateUserDto,
+    user: UserData,
+  ): Promise<ApiResponseDto<UserResponse>> {
+    return await this.userRepository.updateUserCore(dto, user);
+  }
+
+  async upsertUserAddress(
+    dtos: UpsertAddressDto[],
+    user: UserData,
+  ): Promise<ApiResponseDto<boolean>> {
+    return await this.userRepository.upsertUserAddress(dtos, user);
   }
 }

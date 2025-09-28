@@ -1,23 +1,29 @@
 import { IsIn, IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class SearchProductDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
+  // @IsOptional()
+  // @IsString()
+  // name?: string;
 
-  @IsOptional()
-  @IsIn(['price', 'rating'])
-  sortBy?: 'price' | 'rating';
+  // @IsOptional()
+  // @IsIn(['price', 'rating'])
+  // sortBy?: 'price' | 'rating';
 
-  @IsOptional()
-  @IsIn(['asc', 'desc'])
+  // @IsOptional()
+  // @IsIn(['asc', 'desc'])
+  // sortOrder?: 'asc' | 'desc';
+
+  // @IsOptional()
+  // @IsNumberString()
+  // page?: string; // Can be parsed into number later
+
+  // @IsOptional()
+  // @IsNumberString()
+  // pageSize?: string; // Same
+
+  page?: number;
+  pageSize?: number;
   sortOrder?: 'asc' | 'desc';
-
-  @IsOptional()
-  @IsNumberString()
-  page?: string; // Can be parsed into number later
-
-  @IsOptional()
-  @IsNumberString()
-  pageSize?: string; // Same
+  keyword?: string;
+  categoryId?: number;
 }

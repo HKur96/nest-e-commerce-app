@@ -10,52 +10,13 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  sellerId: number;
-
-  @IsNotEmpty()
-  @IsString()
   name: string;
-
-  @IsString()
-  description?: string;
-
-  @IsNotEmpty()
-  @IsNumber()
+  slug: string;
+  description: string;
   price: number;
-
-  @IsNotEmpty()
-  @IsNumber()
+  stock: number;
+  sellerId: number;
   categoryId: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  stockQuantity: number;
-
-  @IsNumber()
-  @IsOptional()
-  discountId?: number;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Image)
-  images: Image[];
-}
-
-export class Image {
-  @IsNotEmpty()
-  @IsString()
-  url: string;
-
-  @IsOptional()
-  altText?: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  position: number;
-
-  @IsOptional()
-  isThumbnail?: boolean = true;
+  images?: string[];
+  variants?: { name: string; value: string }[];
 }
