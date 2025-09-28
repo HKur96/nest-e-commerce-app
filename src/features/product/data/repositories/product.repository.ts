@@ -30,6 +30,7 @@ export class ProductRepository implements ProductRepositoryInterface {
               merchantName: true,
               merchantLogoUrl: true,
               address: { select: { city: { select: { name: true } } } },
+              isOfficial: true,
             },
           },
           category: { select: { name: true } },
@@ -65,6 +66,7 @@ export class ProductRepository implements ProductRepositoryInterface {
           seller_name: product.seller?.merchantName ?? '',
           seller_location: product.seller?.address?.city?.name ?? '',
           seller_icon_url: product.seller?.merchantLogoUrl,
+          is_official_seller: product.seller?.isOfficial == true,
           category_name: product.category.name,
           reviews: product.reviews.map<ReviewDetail>(
             (review) =>

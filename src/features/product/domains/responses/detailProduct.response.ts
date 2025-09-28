@@ -22,7 +22,7 @@ export class CollectionDetail {
 
   @ApiProperty()
   type: CollectionType
-  
+
   constructor(partial: Partial<CollectionDetail>) {
     Object.assign(this, partial);
   }
@@ -55,6 +55,9 @@ export class DetailProductResponse {
 
   @ApiProperty()
   seller_location: string;
+
+  @ApiProperty()
+  is_official_seller: boolean;
 
   @ApiProperty()
   seller_icon_url: string;
