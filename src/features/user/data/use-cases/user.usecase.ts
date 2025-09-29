@@ -7,6 +7,8 @@ import { SignInDto } from '../../domains/dtos/signIn.dto';
 import { UpdateUserDto } from '../../domains/dtos/updateUser.dto';
 import { UserData } from '@/utils/decorators/user.decorator';
 import { UpsertAddressDto } from '../../domains/dtos/upsertAddress.dto';
+import { UserDetailResponse } from '../../domains/responses/userDetail.response';
+import { UpdateSellerDto } from '../../domains/dtos/updateSeller.dto';
 
 @Injectable()
 export class UserUseCase {
@@ -18,6 +20,10 @@ export class UserUseCase {
 
   async signIn(dto: SignInDto): Promise<ApiResponseDto<UserResponse>> {
     return await this.userRepository.signIn(dto);
+  }
+
+  async getUserDetail(id: number): Promise<ApiResponseDto<UserDetailResponse>> {
+    return await this.userRepository.getUserDetail(id);
   }
 
   async updateUserCore(
@@ -32,5 +38,12 @@ export class UserUseCase {
     user: UserData,
   ): Promise<ApiResponseDto<boolean>> {
     return await this.userRepository.upsertUserAddress(dtos, user);
+  }
+
+  async updateUserSeller(
+    dto: UpdateSellerDto,
+    user: UserData,
+  ): Promise<ApiResponseDto<UserResponse>> {
+    return await this.userRepository.updateUserSeller(dto, user);
   }
 }

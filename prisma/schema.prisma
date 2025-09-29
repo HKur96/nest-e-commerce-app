@@ -82,6 +82,7 @@ model User {
   password       String
   name           String
   avatarUrl      String?
+  phoneNumber    String?
   role           Role             @default(USER)
   addresses      Address[]
   seller         Seller?
