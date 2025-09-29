@@ -7,6 +7,7 @@ import { AddressModule } from './features/address/address.module';
 import { ProductModule } from './features/product/product.module';
 import { WishlistModule } from './features/wishlist/wishlist.module';
 import { CartModule } from './features/cart/cart.module';
+import { OrderModule } from './features/order/order.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CartModule } from './features/cart/cart.module';
     ProductModule,
     WishlistModule,
     CartModule,
+    OrderModule,
     PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true,

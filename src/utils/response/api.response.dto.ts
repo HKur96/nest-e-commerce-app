@@ -1,4 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class ApiResponseDto<T = any> {
+  @ApiProperty()
   meta: {
     success: boolean;
     message: string;
@@ -7,6 +10,8 @@ export class ApiResponseDto<T = any> {
     page?: number;
     total_page?: number;
   };
+
+  @ApiProperty()
   data?: T;
 
   constructor(

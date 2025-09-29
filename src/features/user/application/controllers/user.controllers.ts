@@ -62,7 +62,6 @@ export class UserController {
   }
 
   @ApiCreatedResponse({ description: 'User detail successfully got' })
-  @ApiQuery({ name: 'id', required: true, type: String })
   @ApiResponse({
     status: 200,
     description: 'User detail successfully got',
