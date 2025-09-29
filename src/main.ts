@@ -31,9 +31,9 @@ async function bootstrap() {
 
   // set interceptor
   app.useGlobalInterceptors(new ApiResponseInterceptor());
-  
+
   const PORT = process.env.PORT || 3000;
-  await app.listen(PORT, () => {
+  await app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server started at port ${PORT}`);
   });
 }
