@@ -7,10 +7,89 @@ import { Injectable } from '@nestjs/common';
 import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
 import { CategoryResponse } from '../../domains/responses/category.response';
+import {
+  CollectionDetail,
+  DetailProductResponse,
+  ReviewDetail,
+} from '../../domains/responses/detailProduct.response';
 
 @Injectable()
 export class ProductRepository implements ProductRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getDetailProduct(
+    id: number,
+  ): Promise<ApiResponseDto<DetailProductResponse>> {
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { id },
+        include: {
+          images: { select: { url: true } },
+          seller: {
+            select: {
+              merchantName: true,
+              merchantLogoUrl: true,
+              address: { select: { city: { select: { name: true } } } },
+              isOfficial: true,
+            },
+          },
+          category: { select: { name: true } },
+          reviews: {
+            select: {
+              comment: true,
+              rating: true,
+              user: { select: { name: true } },
+            },
+          },
+          variants: { select: { name: true } },
+          collections: {
+            select: { collection: { select: { name: true, type: true } } },
+          },
+        },
+      });
+
+      if (!product) {
+        return ApiResponseDto.error('Product not found', 404);
+      }
+
+      return ApiResponseDto.success(
+        'Detail product successfully got',
+        new DetailProductResponse({
+          id: product.id.toString(),
+          name: product.name,
+          description: product.description,
+          price: product.price.toNumber(),
+          slug: product.slug,
+          total_sold: product.totalSold,
+          stock: product.stock,
+          image_urls: product.images.map<string>((img) => img.url),
+          seller_name: product.seller?.merchantName ?? '',
+          seller_location: product.seller?.address?.city?.name ?? '',
+          seller_icon_url: product.seller?.merchantLogoUrl,
+          is_official_seller: product.seller?.isOfficial == true,
+          category_name: product.category.name,
+          reviews: product.reviews.map<ReviewDetail>(
+            (review) =>
+              new ReviewDetail({
+                user_name: review.user.name,
+                comment: review.comment,
+                rating: review.rating,
+              }),
+          ),
+          variants: product.variants.map<string>((vr) => vr.name),
+          collections: product.collections.map<CollectionDetail>(
+            (cl) =>
+              new CollectionDetail({
+                name: cl.collection.name,
+                type: cl.collection.type,
+              }),
+          ),
+        }),
+      );
+    } catch (error) {
+      return ApiResponseDto.error('Unexpected error while get detail product');
+    }
+  }
 
   async getAllCategories(): Promise<ApiResponseDto<CategoryResponse[]>> {
     try {
