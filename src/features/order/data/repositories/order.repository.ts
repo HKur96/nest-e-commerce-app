@@ -6,7 +6,10 @@ import {
   OrderResponse,
   ProductOrderResponse,
 } from '../../domains/response/order.response';
-import { OrderDetailResponse } from '../../domains/response/orderDetail.response';
+import {
+  OrderDetailResponse,
+  OrderProductResponse,
+} from '../../domains/response/orderDetail.response';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/infra/config/prisma/prisma.service';
 import { UpdateOrderDto } from '../../domains/dtos/updateOrder.dto';
@@ -177,11 +180,63 @@ export class OrderRepository implements OrderRepositoryInterface {
     }
   }
 
-  // TODO: SHOULD BE GET DELIVERY STATUS
   async getOrderDetail(
     id: number,
     user: UserData,
   ): Promise<ApiResponseDto<OrderDetailResponse>> {
-    throw new Error('Method not implemented.');
+    try {
+      const orderDetail = await this.prisma.order.findFirst({
+        where: { id, userId: user.id },
+        include: {
+          delivery: {
+            select: { id: true, icon: true, name: true, kind: true },
+          },
+          orderProducts: {
+            select: {
+              quantity: true,
+              price: true,
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  images: { select: { url: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!orderDetail) {
+        return ApiResponseDto.error('Order detail not found', 404);
+      }
+
+      return ApiResponseDto.success(
+        'Order detail successfully got',
+        new OrderDetailResponse({
+          id: orderDetail.id,
+          total_price: orderDetail.totalPrice.toNumber(),
+          status: orderDetail.status,
+          created_at: orderDetail.createdAt.toISOString(),
+          updated_at: orderDetail.updatedAt.toISOString(),
+          delivery_id: orderDetail.delivery.id,
+          delivery_name: orderDetail.delivery.name,
+          delivery_icon: orderDetail.delivery.icon ?? null,
+          delivery_kind: orderDetail.delivery.kind,
+          order_products: orderDetail.orderProducts.map<OrderProductResponse>(
+            (op) =>
+              new OrderProductResponse({
+                product_price: op.price.toNumber(),
+                quantity: op.quantity,
+                product_id: op.product.id,
+                product_name: op.product.name,
+                product_images: op.product.images.map<string>((pr) => pr.url),
+              }),
+          ),
+        }),
+      );
+    } catch (error) {
+      return ApiResponseDto.error('Unexpected error while get order detail');
+    }
   }
 }

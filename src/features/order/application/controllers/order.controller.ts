@@ -11,6 +11,7 @@ import {
 import { OrderUseCase } from '../../data/use-cases/order.usecase';
 import { AuthGuard } from '@/utils/guards/auth.guard';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -62,6 +63,7 @@ export class OrderController {
   @ApiCreatedResponse({ description: 'Endpoint to get order detail by id' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ status: 200, type: OrderDetailResponse })
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SELLER, Role.USER)
   @Get('/:id')
   async getOrderDetail(
