@@ -52,7 +52,7 @@ export class UserDetailResponse {
   @ApiProperty()
   role: string;
 
-  @ApiProperty()
+  @ApiProperty({type: () => [AddressDetailResponse]})
   addresses: AddressDetailResponse[];
 
   @ApiProperty()

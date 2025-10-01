@@ -13,7 +13,7 @@ export class WishlistResponse {
   @ApiProperty()
   product_price: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [String] })
   product_images: string[];
 
   constructor(partial: Partial<WishlistResponse>) {

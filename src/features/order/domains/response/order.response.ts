@@ -8,7 +8,7 @@ export class ProductOrderResponse {
   @ApiProperty()
   product_name: string;
 
-  @ApiProperty()
+  @ApiProperty({type: () => [String]})
   product_images: string[];
 
   @ApiProperty()
@@ -44,7 +44,7 @@ export class OrderResponse {
   @ApiProperty()
   delivery_icon?: string;
 
-  @ApiProperty()
+  @ApiProperty({type: () => [ProductOrderResponse]})
   products: ProductOrderResponse[];
 
   constructor(partial: Partial<OrderResponse>) {

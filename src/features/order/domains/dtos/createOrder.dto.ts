@@ -12,6 +12,6 @@ export class CreateOrderDto {
   @ApiProperty()
   delivery_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [ProductDto] })
   products: ProductDto[];
 }

@@ -13,7 +13,7 @@ export class CartResponse {
   @ApiProperty()
   product_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [String] })
   product_images: string[];
 
   @ApiProperty()

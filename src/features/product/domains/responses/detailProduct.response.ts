@@ -21,7 +21,7 @@ export class CollectionDetail {
   name: string;
 
   @ApiProperty()
-  type: CollectionType
+  type: CollectionType;
 
   constructor(partial: Partial<CollectionDetail>) {
     Object.assign(this, partial);
@@ -65,16 +65,16 @@ export class DetailProductResponse {
   @ApiProperty()
   category_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [String] })
   image_urls: string[];
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [String] })
   variants: string[];
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [ReviewDetail] })
   reviews: ReviewDetail[];
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [CollectionDetail] })
   collections: CollectionDetail[];
 
   constructor(partial: Partial<DetailProductResponse>) {

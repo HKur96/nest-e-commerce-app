@@ -17,7 +17,13 @@ import { AuthGuard } from '@/utils/guards/auth.guard';
 import { Roles } from '@/utils/decorators/role.decorator';
 import { Role } from '@prisma/client';
 import { AddressResponse } from '../../domains/responses/address.response';
-import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCreatedResponse,
+  ApiBody,
+  ApiResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { UserAddress } from '../../domains/responses/userAddress.response';
 import { User, UserData } from '@/utils/decorators/user.decorator';
 
@@ -28,6 +34,12 @@ export class AddressController {
   constructor(private readonly addressUseCase: AddressUseCase) {}
 
   @ApiCreatedResponse({ description: 'Province successfully created' })
+  @ApiBody({
+    type: ProvinceDto,
+    isArray: true,
+    required: true,
+  })
+  @ApiResponse({ type: Boolean })
   @Roles(Role.ADMIN)
   @Post('/province/create')
   createProvince(
@@ -37,6 +49,12 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'City successfully created' })
+  @ApiBody({
+    type: CityDto,
+    isArray: true,
+    required: true,
+  })
+  @ApiResponse({ type: Boolean })
   @Roles(Role.ADMIN)
   @Post('/city/create')
   createCity(@Body() dtos: CityDto[]): Promise<ApiResponseDto<boolean>> {
@@ -44,6 +62,12 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'Subdistrict successfully created' })
+  @ApiBody({
+    type: SubDistrictDto,
+    isArray: true,
+    required: true,
+  })
+  @ApiResponse({ type: Boolean })
   @Roles(Role.ADMIN)
   @Post('/subdistrict/create')
   createSubdistrict(
@@ -53,6 +77,8 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'Ward successfully created' })
+  @ApiBody({ type: WardDto, isArray: true, required: true })
+  @ApiResponse({ type: Boolean })
   @Roles(Role.ADMIN)
   @Post('ward/create')
   createWard(@Body() dtos: WardDto[]): Promise<ApiResponseDto<boolean>> {
@@ -60,6 +86,8 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'Province successfully got' })
+  @ApiParam({ name: 'id', required: true })
+  @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
   @Get('/province/:id')
   getAllProvinces(
@@ -69,15 +97,19 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'City successfully got' })
+  @ApiParam({ name: 'id', required: true })
+  @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
   @Get('/city/:id')
   getAllCity(
     @Param('id', ParseIntPipe) provinceId: number,
-  ): Promise<ApiResponseDto> {
+  ): Promise<ApiResponseDto<AddressResponse[]>> {
     return this.addressUseCase.getAllCities(provinceId);
   }
 
   @ApiCreatedResponse({ description: 'Subdistrict successfully got' })
+  @ApiParam({ name: 'id', required: true })
+  @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
   @Get('/subdistrict/:id')
   getAllSubdistricts(
@@ -87,6 +119,8 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'Ward successfully got' })
+  @ApiParam({ name: 'id', required: true })
+  @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
   @Get('/ward/:id')
   getAllWards(
@@ -96,6 +130,7 @@ export class AddressController {
   }
 
   @ApiCreatedResponse({ description: 'Address successfully got' })
+  @ApiResponse({ type: UserAddress, isArray: true })
   @Roles(Role.ADMIN, Role.SELLER, Role.USER)
   @Get()
   getUserAddress(
