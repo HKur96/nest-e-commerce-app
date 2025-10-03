@@ -92,7 +92,7 @@ model User {
   reviews        Review[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  SellerFollower SellerFollower[]
+  sellerFollower SellerFollower[]
 
   @@index([role])
 }

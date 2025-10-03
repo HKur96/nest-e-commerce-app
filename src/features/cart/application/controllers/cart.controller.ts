@@ -18,10 +18,10 @@ import { AddToCart } from '../../domains/dtos/addCart.dto';
 import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import {
   ApiTags,
-  ApiCreatedResponse,
   ApiQuery,
   ApiResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { CartResponse } from '../../domains/response/cart.response';
 import { User, UserData } from '@/utils/decorators/user.decorator';
@@ -33,7 +33,7 @@ import { UpdateCartDto } from '../../domains/dtos/updateCart.dto';
 export class CartController {
   constructor(private readonly cartUseCase: CartUseCase) {}
 
-  @ApiCreatedResponse({ description: 'Cart successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create a cart by user id' })
   @ApiQuery({ name: 'user_id', required: true, type: Number })
   @ApiQuery({ name: 'product_id', required: true, type: Number })
   @ApiQuery({ name: 'quantity', required: true, type: Number })
@@ -48,7 +48,7 @@ export class CartController {
     return this.cartUseCase.addToCart(dto);
   }
 
-  @ApiCreatedResponse({ description: 'Cart successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get a cart by user id' })
   @ApiResponse({
     status: 200,
     description: 'Cart successfully got',
@@ -63,7 +63,7 @@ export class CartController {
     return await this.cartUseCase.getCartByUserId(user.id);
   }
 
-  @ApiCreatedResponse({ description: 'Cart successfully updated' })
+  @ApiOperation({ summary: 'Endpoint to update a cart by user id' })
   @ApiResponse({
     status: 200,
     type: Boolean,

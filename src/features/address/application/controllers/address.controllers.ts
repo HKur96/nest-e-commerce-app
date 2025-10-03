@@ -19,10 +19,10 @@ import { Role } from '@prisma/client';
 import { AddressResponse } from '../../domains/responses/address.response';
 import {
   ApiTags,
-  ApiCreatedResponse,
   ApiBody,
   ApiResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { UserAddress } from '../../domains/responses/userAddress.response';
 import { User, UserData } from '@/utils/decorators/user.decorator';
@@ -33,7 +33,7 @@ import { User, UserData } from '@/utils/decorators/user.decorator';
 export class AddressController {
   constructor(private readonly addressUseCase: AddressUseCase) {}
 
-  @ApiCreatedResponse({ description: 'Province successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create a province' })
   @ApiBody({
     type: ProvinceDto,
     isArray: true,
@@ -48,7 +48,7 @@ export class AddressController {
     return this.addressUseCase.createProvince(dtos);
   }
 
-  @ApiCreatedResponse({ description: 'City successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create a city' })
   @ApiBody({
     type: CityDto,
     isArray: true,
@@ -61,7 +61,7 @@ export class AddressController {
     return this.addressUseCase.createCity(dtos);
   }
 
-  @ApiCreatedResponse({ description: 'Subdistrict successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create a subdistrict' })
   @ApiBody({
     type: SubDistrictDto,
     isArray: true,
@@ -76,7 +76,7 @@ export class AddressController {
     return this.addressUseCase.createSubdistrict(dtos);
   }
 
-  @ApiCreatedResponse({ description: 'Ward successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create a ward' })
   @ApiBody({ type: WardDto, isArray: true, required: true })
   @ApiResponse({ type: Boolean })
   @Roles(Role.ADMIN)
@@ -85,7 +85,7 @@ export class AddressController {
     return this.addressUseCase.createWard(dtos);
   }
 
-  @ApiCreatedResponse({ description: 'Province successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get provinces' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
@@ -96,7 +96,7 @@ export class AddressController {
     return this.addressUseCase.getAllProvinces(stateId);
   }
 
-  @ApiCreatedResponse({ description: 'City successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get cities' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
@@ -107,7 +107,7 @@ export class AddressController {
     return this.addressUseCase.getAllCities(provinceId);
   }
 
-  @ApiCreatedResponse({ description: 'Subdistrict successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get districts' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
@@ -118,7 +118,7 @@ export class AddressController {
     return this.addressUseCase.getSubdistrict(cityId);
   }
 
-  @ApiCreatedResponse({ description: 'Ward successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get wards' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ type: AddressResponse, isArray: true })
   @Roles(Role.ADMIN, Role.USER, Role.SELLER)
@@ -129,7 +129,7 @@ export class AddressController {
     return this.addressUseCase.getWards(subdistrictId);
   }
 
-  @ApiCreatedResponse({ description: 'Address successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get user address by user id' })
   @ApiResponse({ type: UserAddress, isArray: true })
   @Roles(Role.ADMIN, Role.SELLER, Role.USER)
   @Get()

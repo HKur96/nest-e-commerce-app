@@ -29,4 +29,6 @@ export interface UserRepositoryInterface {
     dto: UpdateSellerDto,
     user: UserData,
   ): Promise<ApiResponseDto<UserResponse>>;
+
+  getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>>;
 }

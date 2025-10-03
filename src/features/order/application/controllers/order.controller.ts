@@ -13,8 +13,8 @@ import { AuthGuard } from '@/utils/guards/auth.guard';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
@@ -34,7 +34,7 @@ import { Role } from '@prisma/client';
 export class OrderController {
   constructor(private readonly orderUseCase: OrderUseCase) {}
 
-  @ApiCreatedResponse({ description: 'Endpoint to create an order' })
+  @ApiOperation({ summary: 'Endpoint to create an order' })
   @ApiBody({ type: CreateOrderDto })
   @ApiResponse({ status: 200, type: Boolean })
   @Roles(Role.USER)
@@ -46,7 +46,7 @@ export class OrderController {
     return await this.orderUseCase.createOrder(dto, user);
   }
 
-  @ApiCreatedResponse({ description: 'Endpoint to get all orders' })
+  @ApiOperation({ summary: 'Endpoint to get all orders' })
   @ApiOkResponse({
     description: 'List of all orders for the current user',
     type: OrderResponse,
@@ -60,7 +60,7 @@ export class OrderController {
     return await this.orderUseCase.getAllOrders(user);
   }
 
-  @ApiCreatedResponse({ description: 'Endpoint to get order detail by id' })
+  @ApiOperation({ summary: 'Endpoint to get order detail by id' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ status: 200, type: OrderDetailResponse })
   @ApiBearerAuth('access-token')
@@ -73,7 +73,7 @@ export class OrderController {
     return await this.orderUseCase.getOrderDetail(id, user);
   }
 
-  @ApiCreatedResponse({ description: 'Endpoint to update order by id' })
+  @ApiOperation({ summary: 'Endpoint to update order by id' })
   @ApiParam({ name: 'id', required: true })
   @ApiBody({ type: UpdateOrderDto })
   @Roles(Role.ADMIN)

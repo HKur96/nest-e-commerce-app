@@ -21,6 +21,29 @@ import { UpdateSellerDto } from '../../domains/dtos/updateSeller.dto';
 export class UserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
+  async getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>> {
+    try {
+      const followerCount = await this.prisma.sellerFollower.count({
+        where: {
+          sellerId: sellerId,
+        },
+      });
+
+      if (!followerCount) {
+        return ApiResponseDto.error('Seller follower not found', 404);
+      }
+
+      return ApiResponseDto.success(
+        'Seller follower successfully got',
+        followerCount,
+      );
+    } catch (error) {
+      return ApiResponseDto.error(
+        'Unexpected error while getting seller follower',
+      );
+    }
+  }
+
   async getUserDetail(id: number): Promise<ApiResponseDto<UserDetailResponse>> {
     try {
       const user = await this.prisma.user.findUnique({

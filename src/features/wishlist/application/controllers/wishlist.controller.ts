@@ -14,9 +14,9 @@ import { Role } from '@prisma/client';
 import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import {
   ApiTags,
-  ApiCreatedResponse,
   ApiParam,
   ApiResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { User, UserData } from '@/utils/decorators/user.decorator';
 import { WishlistResponse } from '../../domains/wishlist.response';
@@ -27,7 +27,7 @@ import { WishlistResponse } from '../../domains/wishlist.response';
 export class WishlistController {
   constructor(private readonly wishlistUseCase: WishlistUseCase) {}
 
-  @ApiCreatedResponse({ description: 'Wishlist successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create a wishlist' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ status: 200, type: Boolean })
   @Roles(Role.USER)
@@ -39,7 +39,7 @@ export class WishlistController {
     return await this.wishlistUseCase.createWishlist(id, user);
   }
 
-  @ApiCreatedResponse({ description: 'Endpoint to get array of wishlist' })
+  @ApiOperation({ summary: 'Endpoint to get array of wishlist' })
   @ApiResponse({
     status: 200,
     type: WishlistResponse,
@@ -53,9 +53,7 @@ export class WishlistController {
     return await this.wishlistUseCase.getWishlistByUserId(user);
   }
 
-  @ApiCreatedResponse({
-    description: 'Endpoint to delete wishlist by product id',
-  })
+  @ApiOperation({ summary: 'Endpoint to delete wishlist by product id' })
   @ApiResponse({
     status: 200,
     type: Boolean,

@@ -46,4 +46,8 @@ export class UserUseCase {
   ): Promise<ApiResponseDto<UserResponse>> {
     return await this.userRepository.updateUserSeller(dto, user);
   }
+
+  async getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>> {
+    return await this.userRepository.getSellerFollower(sellerId);
+  }
 }
