@@ -50,4 +50,11 @@ export class UserUseCase {
   async getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>> {
     return await this.userRepository.getSellerFollower(sellerId);
   }
+
+  async updateSellerFollower(
+    user: UserData,
+    sellerId: number,
+  ): Promise<ApiResponseDto<boolean>> {
+    return await this.userRepository.updateSellerFollower(user, sellerId);
+  }
 }

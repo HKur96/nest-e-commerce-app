@@ -31,4 +31,9 @@ export interface UserRepositoryInterface {
   ): Promise<ApiResponseDto<UserResponse>>;
 
   getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>>;
+
+  updateSellerFollower(
+    user: UserData,
+    sellerId: number,
+  ): Promise<ApiResponseDto<boolean>>;
 }

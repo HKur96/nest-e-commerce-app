@@ -143,4 +143,20 @@ export class UserController {
   ): Promise<ApiResponseDto<number>> {
     return await this.useCase.getSellerFollower(sellerId);
   }
+
+  @ApiOperation({ summary: 'Endpoint to update seller follower' })
+  @UseGuards(AuthGuard)
+  @Roles(Role.USER)
+  @ApiResponse({
+    status: 200,
+    description: 'Seller follower successfully updated',
+    type: Boolean,
+  })
+  @Put('/seller-follower/:sellerId')
+  async updateSellerFollower(
+    @Param('sellerId', ParseIntPipe) sellerId: number,
+    @User() user: UserData,
+  ): Promise<ApiResponseDto<boolean>> {
+    return await this.useCase.updateSellerFollower(user, sellerId);
+  }
 }
