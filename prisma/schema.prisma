@@ -91,7 +91,11 @@ model User {
   reviews        Review[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  SellerFollower SellerFollower[]
+  sellerFollower SellerFollower[]
+
+  // ✅ Chat relations
+  messages        Message[]
+  chatParticipant ChatParticipant[]
 
   @@index([role])
 }
@@ -314,4 +318,55 @@ model CollectionProduct {
   @@unique([collectionId, productId])
   @@index([collectionId])
   @@index([productId])
+}
+
+/// =========================
+/// CHAT MODELS
+/// =========================
+model ChatRoom {
+  id           Int               @id @default(autoincrement())
+  name         String? // for group chats, optional for 1-to-1 chats
+  isGroup      Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  participants ChatParticipant[]
+  messages     Message[]
+}
+
+model ChatParticipant {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  chatRoomId Int
+  user       User     @relation(fields: [userId], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  joinedAt   DateTime @default(now())
+
+  @@unique([userId, chatRoomId])
+  @@index([userId])
+  @@index([chatRoomId])
+}
+
+model Message {
+  id          Int         @id @default(autoincrement())
+  chatRoomId  Int
+  senderId    Int
+  content     String?
+  messageType MessageType @default(TEXT)
+  mediaUrl    String? // for image, file, or voice message
+  isRead      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+  sender   User     @relation(fields: [senderId], references: [id])
+
+  @@index([chatRoomId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  VOICE
 }
