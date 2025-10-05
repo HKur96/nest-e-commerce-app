@@ -11,10 +11,128 @@ import { SignInDto } from '../../domains/dtos/signIn.dto';
 import { UpdateUserDto } from '../../domains/dtos/updateUser.dto';
 import { UserData } from '@/utils/decorators/user.decorator';
 import { UpsertAddressDto } from '../../domains/dtos/upsertAddress.dto';
+import {
+  AddressDetailResponse,
+  UserDetailResponse,
+} from '../../domains/responses/userDetail.response';
+import { UpdateSellerDto } from '../../domains/dtos/updateSeller.dto';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+
+  async updateSellerFollower(
+    user: UserData,
+    sellerId: number,
+  ): Promise<ApiResponseDto<boolean>> {
+    try {
+      const sellerFollowerId = await this.prisma.sellerFollower.upsert({
+        where: {
+          sellerId_userId: { sellerId, userId: user.id },
+        },
+        select: { id: true },
+        update: { updatedAt: new Date() },
+        create: {
+          sellerId,
+          userId: user.id,
+        },
+      });
+
+      if (!sellerFollowerId) {
+        return ApiResponseDto.error('Cannot updating seller follower', 401);
+      }
+
+      return ApiResponseDto.success(
+        'Seller follower successfully updated',
+        !!sellerFollowerId,
+      );
+    } catch (error) {
+      return ApiResponseDto.error(
+        'Unexpected error while updating seller follower',
+      );
+    }
+  }
+
+  async getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>> {
+    try {
+      const followerCount = await this.prisma.sellerFollower.count({
+        where: {
+          sellerId: sellerId,
+        },
+      });
+
+      if (!followerCount) {
+        return ApiResponseDto.error('Seller follower not found', 404);
+      }
+
+      return ApiResponseDto.success(
+        'Seller follower successfully got',
+        followerCount,
+      );
+    } catch (error) {
+      return ApiResponseDto.error(
+        'Unexpected error while getting seller follower',
+      );
+    }
+  }
+
+  async getUserDetail(id: number): Promise<ApiResponseDto<UserDetailResponse>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatarUrl: true,
+          role: true,
+          seller: { select: { id: true } },
+          addresses: {
+            select: {
+              province: { select: { id: true, name: true } },
+              city: { select: { id: true, name: true } },
+              subdistrict: { select: { id: true, name: true } },
+              ward: { select: { id: true, name: true } },
+              streetName: true,
+              detail: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        return ApiResponseDto.error('User not found', 404);
+      }
+
+      return ApiResponseDto.success(
+        'Detail user successfully got',
+        new UserDetailResponse({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          is_seller: !!user.seller,
+          avatar_url: user.avatarUrl,
+          addresses: user.addresses.map<AddressDetailResponse>((adr) => {
+            return new AddressDetailResponse({
+              province_id: adr.province?.id ?? 0,
+              province_name: adr.province?.name ?? '',
+              city_id: adr.city?.id ?? 0,
+              city_name: adr.city?.name ?? '',
+              subdistrict_id: adr.subdistrict?.id ?? 0,
+              subdistrict_name: adr.subdistrict?.name ?? '',
+              ward_id: adr.ward?.id ?? 0,
+              ward_name: adr.ward?.name ?? '',
+              street_name: adr.streetName ?? '',
+              detail_address: adr.detail ?? '',
+            });
+          }),
+        }),
+      );
+    } catch (error) {
+      return ApiResponseDto.error('Unexpected error while get user detail');
+    }
+  }
 
   /**
    * Upsert a list of addresses for a user.
@@ -79,37 +197,124 @@ export class UserRepository implements UserRepositoryInterface {
     }
   }
 
-  async updateUserCart(): Promise<ApiResponseDto<UserResponse>> {
-    throw new Error('Method not implemented.');
-  }
+  async updateUserSeller(
+    dto: UpdateSellerDto,
+    user: UserData,
+  ): Promise<ApiResponseDto<UserResponse>> {
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Create or update the address safely
+        let newAddress;
+        if (dto.address_id) {
+          const existingAddress = await tx.address.findUnique({
+            where: { id: dto.address_id },
+            select: { userId: true },
+          });
 
-  async updateUserSeller(): Promise<ApiResponseDto<UserResponse>> {
-    throw new Error('Method not implemented.');
+          if (!existingAddress || existingAddress.userId !== user.id) {
+            throw new Error('Invalid address ID');
+          }
+
+          newAddress = await tx.address.update({
+            where: { id: dto.address_id },
+            data: {
+              provinceId: dto.province_id,
+              cityId: dto.city_id,
+              subdistrictId: dto.subdistrict_id,
+              wardId: dto.ward_id,
+              streetName: dto.street_name,
+              detail: dto.address_detail,
+              updatedAt: new Date(),
+            },
+            select: { id: true },
+          });
+        } else {
+          newAddress = await tx.address.create({
+            data: {
+              userId: user.id,
+              provinceId: dto.province_id,
+              cityId: dto.city_id,
+              subdistrictId: dto.subdistrict_id,
+              wardId: dto.ward_id,
+              streetName: dto.street_name,
+              detail: dto.address_detail,
+            },
+            select: { id: true },
+          });
+        }
+
+        // Upsert seller details
+        const updatedUser = await tx.user.update({
+          where: { id: user.id },
+          data: {
+            seller: {
+              upsert: {
+                update: {
+                  merchantName: dto.merchant_name,
+                  merchantLogoUrl: dto.merchant_logo_url,
+                  detailLocation: dto.address_detail,
+                  addressId: newAddress.id,
+                },
+                create: {
+                  merchantName: dto.merchant_name,
+                  merchantLogoUrl: dto.merchant_logo_url,
+                  detailLocation: dto.address_detail,
+                  addressId: newAddress.id,
+                },
+              },
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            avatarUrl: true,
+            role: true,
+          },
+        });
+
+        return updatedUser;
+      });
+
+      return ApiResponseDto.success(
+        'Seller data successfully updated',
+        new UserResponse({
+          id: result.id,
+          email: result.email,
+          name: result.name,
+          avatar_url: result.avatarUrl,
+          role: result.role,
+        }),
+      );
+    } catch (error) {
+      return ApiResponseDto.error(
+        error.message || 'Unexpected error while updating seller',
+      );
+    }
   }
 
   async updateUserCore(
-    { name, email, password, avatar_url }: UpdateUserDto,
+    { name, email, password, avatar_url, phone_number }: UpdateUserDto,
     user: UserData,
   ): Promise<ApiResponseDto<UserResponse>> {
     const existingUser = await this.prisma.user.findUnique({
       where: { id: user.id },
     });
+
     if (!existingUser) {
       return ApiResponseDto.error('User not found', 404);
-    }
-
-    const data: any = { name, email, avatar_url };
-
-    // Hash password if provided
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      data.password = await bcrypt.hash(password, salt);
     }
 
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data,
+        data: {
+          name,
+          email,
+          avatarUrl: avatar_url,
+          phoneNumber: phone_number,
+          ...(password && { password: await bcrypt.hash(password, 10) }),
+        },
         select: {
           id: true,
           email: true,

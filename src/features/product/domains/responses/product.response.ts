@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductResponse {
   @ApiProperty()
@@ -16,7 +16,7 @@ export class ProductResponse {
   @ApiProperty()
   seller_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => [String] })
   images: string[] | null;
 
   @ApiProperty()

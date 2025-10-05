@@ -24,7 +24,7 @@ export class UpdateUserDto {
   avatar_url?: string;
 
   @ApiProperty({example: null})
-  @IsEnum(Role)
   @IsOptional()
-  role?: Role;
+  @IsString()
+  phone_number?: string;
 }

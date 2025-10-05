@@ -38,7 +38,7 @@ model Province {
   id      Int       @id @default(autoincrement())
   name    String
   cities  City[]
-  Address Address[]
+  address Address[]
 }
 
 model City {
@@ -47,7 +47,7 @@ model City {
   provinceId   Int
   province     Province      @relation(fields: [provinceId], references: [id])
   subdistricts Subdistrict[]
-  Address      Address[]
+  address      Address[]
 
   @@index([provinceId])
 }
@@ -58,7 +58,7 @@ model Subdistrict {
   cityId  Int
   city    City      @relation(fields: [cityId], references: [id])
   wards   Ward[]
-  Address Address[]
+  address Address[]
 
   @@index([cityId])
 }
@@ -68,7 +68,7 @@ model Ward {
   name          String
   subdistrictId Int
   subdistrict   Subdistrict @relation(fields: [subdistrictId], references: [id])
-  Address       Address[]
+  address       Address[]
 
   @@index([subdistrictId])
 }
@@ -82,6 +82,7 @@ model User {
   password       String
   name           String
   avatarUrl      String?
+  phoneNumber    String?
   role           Role             @default(USER)
   addresses      Address[]
   seller         Seller?
@@ -115,6 +116,7 @@ model Seller {
   address         Address?         @relation(fields: [addressId], references: [id])
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  collection      Collection[]
 }
 
 model SellerFollower {
@@ -123,7 +125,7 @@ model SellerFollower {
   userId    Int
   seller    Seller   @relation(fields: [sellerId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
   @@unique([sellerId, userId])
   @@index([sellerId])
@@ -146,7 +148,7 @@ model Address {
   detail        String? // house number, RT/RW, etc.
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  Seller        Seller[]
+  seller        Seller[]
 
   @@index([userId])
   @@index([provinceId])
@@ -188,9 +190,9 @@ model Product {
   collections  CollectionProduct[]
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
-  Cart         Cart[]
-  Wishlist     Wishlist[]
-  OrderProduct OrderProduct[]
+  cart         Cart[]
+  wishlist     Wishlist[]
+  orderProduct OrderProduct[]
 
   @@index([sellerId])
   @@index([categoryId])
@@ -248,8 +250,8 @@ model Cart {
 model Wishlist {
   id        Int     @id @default(autoincrement())
   userId    Int
-  productId Int
   user      User    @relation(fields: [userId], references: [id])
+  productId Int
   product   Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
@@ -276,11 +278,11 @@ model Order {
 
 model OrderProduct {
   id        Int     @id @default(autoincrement())
-  orderId   Int
-  productId Int
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
+  orderId   Int
   order     Order   @relation(fields: [orderId], references: [id])
+  productId Int
   product   Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
@@ -293,13 +295,15 @@ model DeliveryService {
   icon      String?
   kind      DeliveryKind
   createdAt DateTime     @default(now())
-  Order     Order[]
+  order     Order[]
 
   @@index([kind])
 }
 
 model Collection {
   id        Int                 @id @default(autoincrement())
+  sellerId  Int
+  seller    Seller              @relation(fields: [sellerId], references: [id])
   type      CollectionType
   name      String
   products  CollectionProduct[]

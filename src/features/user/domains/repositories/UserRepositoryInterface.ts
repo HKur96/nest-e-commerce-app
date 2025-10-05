@@ -5,6 +5,8 @@ import { SignInDto } from '../dtos/signIn.dto';
 import { UpdateUserDto } from '../dtos/updateUser.dto';
 import { UserData } from '@/utils/decorators/user.decorator';
 import { UpsertAddressDto } from '../dtos/upsertAddress.dto';
+import { UserDetailResponse } from '../responses/userDetail.response';
+import { UpdateSellerDto } from '../dtos/updateSeller.dto';
 
 export interface UserRepositoryInterface {
   signUp(user: SignUpDto): Promise<ApiResponseDto<UserResponse>>;
@@ -16,12 +18,22 @@ export interface UserRepositoryInterface {
     user: UserData,
   ): Promise<ApiResponseDto<UserResponse>>;
 
+  getUserDetail(id: number): Promise<ApiResponseDto<UserDetailResponse>>;
+
   upsertUserAddress(
     dtos: UpsertAddressDto[],
     user: UserData,
   ): Promise<ApiResponseDto<boolean>>;
 
-  updateUserCart(): Promise<ApiResponseDto<UserResponse>>;
+  updateUserSeller(
+    dto: UpdateSellerDto,
+    user: UserData,
+  ): Promise<ApiResponseDto<UserResponse>>;
 
-  updateUserSeller(): Promise<ApiResponseDto<UserResponse>>;
+  getSellerFollower(sellerId: number): Promise<ApiResponseDto<number>>;
+
+  updateSellerFollower(
+    user: UserData,
+    sellerId: number,
+  ): Promise<ApiResponseDto<boolean>>;
 }

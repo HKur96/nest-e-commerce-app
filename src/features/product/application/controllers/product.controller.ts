@@ -18,9 +18,9 @@ import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
 import {
   ApiTags,
-  ApiCreatedResponse,
   ApiResponse,
   ApiQuery,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
@@ -31,7 +31,7 @@ import { DetailProductResponse } from '../../domains/responses/detailProduct.res
 export class ProductController {
   constructor(private readonly productUseCase: ProductUseCase) {}
 
-  @ApiCreatedResponse({ description: 'Product successfully created' })
+  @ApiOperation({ summary: 'Endpoint to create an order' })
   @Roles(Role.SELLER)
   @ApiResponse({
     status: 200,
@@ -46,7 +46,7 @@ export class ProductController {
     return this.productUseCase.createProduct(dto);
   }
 
-  @ApiCreatedResponse({ description: 'Product successfully searched' })
+  @ApiOperation({ summary: 'Endpoint to search product' })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
@@ -65,7 +65,7 @@ export class ProductController {
     return this.productUseCase.searchProduct(dto);
   }
 
-  @ApiCreatedResponse({ description: 'Categories successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get categories' })
   @ApiResponse({
     status: 200,
     description: 'Categories successfully got',
@@ -77,7 +77,7 @@ export class ProductController {
     return this.productUseCase.getAllCategories();
   }
 
-  @ApiCreatedResponse({ description: 'Detail product successfully got' })
+  @ApiOperation({ summary: 'Endpoint to get detail product by id' })
   @ApiResponse({
     status: 200,
     description: 'Detail product successfully got',
