@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseEnumPipe,
   ParseIntPipe,
   Post,
   Query,
@@ -10,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ProductUseCase } from '../../data/use-cases/product.usecase';
 import { Roles } from '@/utils/decorators/role.decorator';
-import { Role } from '@prisma/client';
+import { CollectionType, Role } from '@prisma/client';
 import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
 import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { AuthGuard } from '@/utils/guards/auth.guard';
@@ -21,9 +23,13 @@ import {
   ApiResponse,
   ApiQuery,
   ApiOperation,
+  ApiParam,
+  ApiBody,
 } from '@nestjs/swagger';
 import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
+import { ProductCollectionResponse } from '../../domains/responses/productCollection.response';
+import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 
 @ApiTags('Product')
 @Controller('product')
@@ -88,5 +94,58 @@ export class ProductController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponseDto<DetailProductResponse>> {
     return this.productUseCase.getDetailProduct(id);
+  }
+
+  @ApiOperation({ summary: 'Endpoint to get all product collections' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product collections successfully got',
+    type: ProductCollectionResponse,
+    isArray: true,
+  })
+  @ApiParam({
+    name: 'Collection Type',
+    enum: CollectionType,
+    enumName: 'Collection',
+  })
+  @Get('/collection/:type')
+  async getAllProductCollections(
+    @Param('type', new ParseEnumPipe(CollectionType)) type: CollectionType,
+  ): Promise<ApiResponseDto<ProductCollectionResponse[]>> {
+    return await this.productUseCase.getAllProductCollections(type);
+  }
+
+  @ApiOperation({ summary: 'Endpoint to add product collection' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product collection successfulyy added',
+    type: Boolean,
+  })
+  @ApiBody({
+    type: CreateCollectionDto,
+    required: true,
+  })
+  @Post('/collection')
+  async addProductCollection(
+    @Body() dto: CreateCollectionDto,
+  ): Promise<ApiResponseDto<boolean>> {
+    return await this.productUseCase.addProductCollection(dto);
+  }
+
+  @ApiOperation({summary: 'Endpoint to delete product collection'})
+  @ApiResponse({
+    status: 200,
+    description: 'Product collection successfully deleted',
+    type: Boolean,
+  })
+  @Delete('/collection')
+  async deleteProductCollection(
+    @Query('collection_id', ParseIntPipe) collectionId: number,
+    @Query('product_id', ParseIntPipe) productId: number,
+  ): Promise<ApiResponseDto<boolean>> {
+    return await this.productUseCase.deleteProductCollection(
+      collectionId,
+      productId,
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { ApiResponseDto } from '@/utils/response/api.response.dto';
-import { Prisma, Role } from '@prisma/client';
+import { CollectionType, Prisma } from '@prisma/client';
 import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
 import { ProductRepositoryInterface } from '../../domains/repositories/ProductRepositoryInterface';
 import { PrismaService } from '@/infra/config/prisma/prisma.service';
@@ -12,10 +12,133 @@ import {
   DetailProductResponse,
   ReviewDetail,
 } from '../../domains/responses/detailProduct.response';
+import { ProductCollectionResponse } from '../../domains/responses/productCollection.response';
+import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 
 @Injectable()
 export class ProductRepository implements ProductRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
+
+  async addProductCollection({
+    name,
+    type,
+    seller_id,
+    product_ids,
+  }: CreateCollectionDto): Promise<ApiResponseDto<boolean>> {
+    try {
+      const newCollection = await this.prisma.collection.create({
+        data: {
+          type,
+          sellerId: seller_id,
+          createdAt: new Date(),
+          name,
+          products: {
+            create: product_ids.map((id) => ({
+              product: {
+                connect: { id },
+              },
+            })),
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!newCollection) {
+        return ApiResponseDto.error('Error while add product collection', 401);
+      }
+
+      return ApiResponseDto.success(
+        'Product collection successfully created',
+        !!newCollection,
+      );
+    } catch (error) {
+      return ApiResponseDto.error(
+        'Unexpected error while add product collection',
+      );
+    }
+  }
+
+  async deleteProductCollection(
+    collectionId: number,
+    productId: number,
+  ): Promise<ApiResponseDto<boolean>> {
+    try {
+      await this.prisma.collectionProduct.delete({
+        where: { collectionId_productId: { collectionId, productId } },
+      });
+
+      return ApiResponseDto.success('Collection successfully deleted', true)
+    } catch (error) {
+      return ApiResponseDto.error('Unexpected error while deleting collection');
+    }
+  }
+
+  async getAllProductCollections(
+    type: CollectionType,
+  ): Promise<ApiResponseDto<ProductCollectionResponse[]>> {
+    try {
+      const collections = await this.prisma.collection.findMany({
+        where: { type },
+        select: {
+          id: true,
+          type: true,
+          products: {
+            select: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  images: { select: { url: true } },
+                  reviews: { select: { rating: true } },
+                  totalSold: true,
+                  seller: { select: { merchantName: true, isOfficial: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!collections) {
+        return ApiResponseDto.error('Product collections not found', 404);
+      }
+
+      return ApiResponseDto.success(
+        'Product collections successfully got',
+        collections.map<ProductCollectionResponse>((pc) => {
+          return new ProductCollectionResponse({
+            collection_id: pc.id,
+            collection_type: pc.type,
+            products: pc.products.map<ProductResponse>((pr) => {
+              const ratings = pr.product.reviews.map((r) => r.rating);
+              const avgRating =
+                ratings.length > 0
+                  ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+                  : 0;
+
+              return new ProductResponse({
+                id: pr.product.id,
+                images: pr.product.images.map<string>((img) => img.url),
+                name: pr.product.name,
+                price: pr.product.price.toNumber(),
+                total_sold: pr.product.totalSold,
+                seller_name: pr.product.seller.merchantName,
+                is_official_store: pr.product.seller.isOfficial,
+                avg_rating: avgRating,
+              });
+            }),
+          });
+        }),
+      );
+    } catch (error) {
+      return ApiResponseDto.error(
+        'Unexpected error while getting product collections',
+      );
+    }
+  }
 
   async getDetailProduct(
     id: number,
