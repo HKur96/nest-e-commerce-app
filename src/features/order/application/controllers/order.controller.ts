@@ -29,6 +29,7 @@ import { Roles } from '@/utils/decorators/role.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Order')
+@ApiBearerAuth('access-token')
 @UseGuards(AuthGuard)
 @Controller('order')
 export class OrderController {
@@ -63,7 +64,6 @@ export class OrderController {
   @ApiOperation({ summary: 'Endpoint to get order detail by id' })
   @ApiParam({ name: 'id', required: true })
   @ApiResponse({ status: 200, type: OrderDetailResponse })
-  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SELLER, Role.USER)
   @Get('/:id')
   async getOrderDetail(

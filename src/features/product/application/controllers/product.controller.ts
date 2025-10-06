@@ -25,6 +25,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
@@ -32,6 +33,7 @@ import { ProductCollectionResponse } from '../../domains/responses/productCollec
 import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 
 @ApiTags('Product')
+@ApiBearerAuth('access-token')
 @Controller('product')
 @UseGuards(AuthGuard)
 export class ProductController {

@@ -269,6 +269,7 @@ export class UserRepository implements UserRepositoryInterface {
             email: true,
             name: true,
             avatarUrl: true,
+            phoneNumber: true,
             role: true,
           },
         });
@@ -283,6 +284,7 @@ export class UserRepository implements UserRepositoryInterface {
           email: result.email,
           name: result.name,
           avatar_url: result.avatarUrl,
+          phone_number: result.phoneNumber,
           role: result.role,
         }),
       );
@@ -321,6 +323,7 @@ export class UserRepository implements UserRepositoryInterface {
           name: true,
           avatarUrl: true,
           role: true,
+          phoneNumber: true,
           updatedAt: true,
         },
       });
@@ -332,6 +335,7 @@ export class UserRepository implements UserRepositoryInterface {
           name: updatedUser.name,
           email: updatedUser.email,
           avatar_url: updatedUser.avatarUrl,
+          phone_number: updatedUser.phoneNumber,
           role: user.role,
         }),
       );
@@ -376,6 +380,7 @@ export class UserRepository implements UserRepositoryInterface {
           email: user.email,
           avatar_url: user.avatarUrl,
           role: user.role,
+          phone_number: user.phoneNumber, 
           token,
         }),
       );
@@ -420,6 +425,7 @@ export class UserRepository implements UserRepositoryInterface {
           name: newUser.name,
           email: newUser.email,
           avatar_url: newUser.avatarUrl,
+          phone_number: newUser.phoneNumber,
           role: newUser.role,
           token,
         }),
