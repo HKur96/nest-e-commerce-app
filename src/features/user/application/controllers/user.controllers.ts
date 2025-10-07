@@ -14,7 +14,7 @@ import { SignInDto } from '@/features/user/domains/dtos/signIn.dto';
 import { SignUpDto } from '@/features/user/domains/dtos/signUp.dto';
 import { UserResponse } from '@/features/user/domains/responses/user.response';
 import { ApiResponseDto } from '@/utils/response/api.response.dto';
-import { ApiTags, ApiResponse, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiBody, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateUserDto } from '../../domains/dtos/updateUser.dto';
 import { AuthGuard } from '@/utils/guards/auth.guard';
 import { User, UserData } from '@/utils/decorators/user.decorator';
@@ -56,6 +56,7 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Endpoint to get user detail' })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 200,
     description: 'User detail successfully got',
@@ -73,6 +74,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Endpoint to update user name, email, password, avatar url',
   })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Roles(Role.ADMIN, Role.SELLER, Role.USER)
   @ApiResponse({
@@ -90,6 +92,7 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Endpoint to update user address' })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Roles(Role.SELLER, Role.USER)
   @ApiResponse({
@@ -110,6 +113,7 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Endpoint update seller data' })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Roles(Role.SELLER)
   @ApiResponse({
@@ -129,6 +133,7 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Endpoint to get seller follower' })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Roles(Role.ADMIN, Role.SELLER, Role.USER)
   @ApiResponse({
@@ -145,6 +150,7 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Endpoint to update seller follower' })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Roles(Role.USER)
   @ApiResponse({

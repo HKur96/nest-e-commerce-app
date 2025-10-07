@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseEnumPipe,
   ParseIntPipe,
   Post,
   Query,
@@ -16,12 +18,13 @@ import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { AuthGuard } from '@/utils/guards/auth.guard';
 import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
-import { ApiTags, ApiResponse, ApiQuery, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiQuery, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
 import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 
 @ApiTags('Product')
+@ApiBearerAuth('access-token')
 @Controller('product')
 @UseGuards(AuthGuard)
 export class ProductController {

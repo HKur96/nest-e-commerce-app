@@ -23,11 +23,13 @@ import {
   ApiResponse,
   ApiParam,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserAddress } from '../../domains/responses/userAddress.response';
 import { User, UserData } from '@/utils/decorators/user.decorator';
 
 @ApiTags('Address')
+@ApiBearerAuth('access-token')
 @UseGuards(AuthGuard)
 @Controller('address')
 export class AddressController {

@@ -22,12 +22,14 @@ import {
   ApiResponse,
   ApiParam,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CartResponse } from '../../domains/response/cart.response';
 import { User, UserData } from '@/utils/decorators/user.decorator';
 import { UpdateCartDto } from '../../domains/dtos/updateCart.dto';
 
 @ApiTags('Cart')
+@ApiBearerAuth('access-token')
 @Controller('cart')
 @UseGuards(AuthGuard)
 export class CartController {

@@ -14,6 +14,9 @@ export class UserResponse {
   @ApiProperty()
   avatar_url: string;
 
+  @ApiProperty({ nullable: true, example: 'string | nullable' })
+  phone_number?: string;
+
   @ApiProperty()
   role: Role;
 

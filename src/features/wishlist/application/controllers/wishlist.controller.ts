@@ -17,11 +17,13 @@ import {
   ApiParam,
   ApiResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { User, UserData } from '@/utils/decorators/user.decorator';
 import { WishlistResponse } from '../../domains/wishlist.response';
 
 @ApiTags('Wishlist')
+@ApiBearerAuth('access-token')
 @Controller('wishlist')
 @UseGuards(AuthGuard)
 export class WishlistController {
