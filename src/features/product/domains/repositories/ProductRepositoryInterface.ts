@@ -4,6 +4,8 @@ import { ProductResponse } from '../responses/product.response';
 import { SearchProductDto } from '../dtos/searchProduct.dto';
 import { CategoryResponse } from '../responses/category.response';
 import { DetailProductResponse } from '../responses/detailProduct.response';
+import { CollectionType } from '@prisma/client';
+import { CreateCollectionDto } from '../dtos/createCollection.dto';
 
 export interface ProductRepositoryInterface {
   createProduct(
@@ -17,4 +19,12 @@ export interface ProductRepositoryInterface {
   getDetailProduct(id: number): Promise<ApiResponseDto<DetailProductResponse>>;
 
   getAllCategories(): Promise<ApiResponseDto<CategoryResponse[]>>;
+
+  createProductCollection(
+    dto: CreateCollectionDto,
+  ): Promise<ApiResponseDto<boolean>>;
+
+  getProductCollections(
+    type: CollectionType,
+  ): Promise<ApiResponseDto<ProductResponse[]>>;
 }

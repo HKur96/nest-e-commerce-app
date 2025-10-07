@@ -304,7 +304,7 @@ model Collection {
   id        Int                 @id @default(autoincrement())
   sellerId  Int
   seller    Seller              @relation(fields: [sellerId], references: [id])
-  type      CollectionType
+  type      CollectionType      @unique
   name      String
   products  CollectionProduct[]
   createdAt DateTime            @default(now())

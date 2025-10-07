@@ -1,5 +1,5 @@
 import { ApiResponseDto } from '@/utils/response/api.response.dto';
-import { Prisma, Role } from '@prisma/client';
+import { CollectionType, Prisma, Role } from '@prisma/client';
 import { CreateProductDto } from '../../domains/dtos/createProduct.dto';
 import { ProductRepositoryInterface } from '../../domains/repositories/ProductRepositoryInterface';
 import { PrismaService } from '@/infra/config/prisma/prisma.service';
@@ -12,10 +12,108 @@ import {
   DetailProductResponse,
   ReviewDetail,
 } from '../../domains/responses/detailProduct.response';
+import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 
 @Injectable()
 export class ProductRepository implements ProductRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createProductCollection({
+    name,
+    type,
+    product_ids,
+    seller_id,
+  }: CreateCollectionDto): Promise<ApiResponseDto<boolean>> {
+    try {
+      const newCollection = await this.prisma.collection.create({
+        data: {
+          type,
+          name,
+          products: {
+            create: product_ids.map((productId) => ({
+              product: { connect: { id: productId } },
+            })),
+          },
+          sellerId: seller_id,
+        },
+        include: {
+          products: {
+            include: { product: true },
+          },
+        },
+      });
+
+      return ApiResponseDto.success(
+        'Collection created successfully',
+        !newCollection,
+      );
+    } catch (error) {
+      return ApiResponseDto.error('Failed to create collection', error.message);
+    }
+  }
+
+  async getProductCollections(
+    type: CollectionType,
+  ): Promise<ApiResponseDto<ProductResponse[]>> {
+    try {
+      const collection = await this.prisma.collection.findUnique({
+        where: { type },
+        select: {
+          products: {
+            select: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  images: { select: { url: true } },
+                  price: true,
+                  totalSold: true,
+                  seller: { select: { isOfficial: true, merchantName: true } },
+                  reviews: {
+                    select: {
+                      rating: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const withAvg = collection.products.map((p) => {
+        const ratings = p.product.reviews.map((r) => r.rating);
+        const avgRating =
+          ratings.length > 0
+            ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+            : 0;
+        return { ...p, avgRating };
+      });
+
+      return ApiResponseDto.success(
+        'Collections retrieved successfully',
+        withAvg.map<ProductResponse>(
+          (product) =>
+            new ProductResponse({
+              id: product.product.id,
+              name: product.product.name,
+              price: product.product.price.toNumber(),
+              total_sold: product.product.totalSold ?? 0,
+              images: product.product.images.map((img) => img.url),
+              avg_rating: product.avgRating,
+              seller_name: product.product.seller.merchantName,
+              is_official_store: product.product.seller.isOfficial,
+            }),
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+      return ApiResponseDto.error(
+        'Failed to retrieve collections',
+        error.message,
+      );
+    }
+  }
 
   async getDetailProduct(
     id: number,
@@ -145,7 +243,7 @@ export class ProductRepository implements ProductRepositoryInterface {
         images: { select: { url: true } },
         reviews: { select: { rating: true } },
         seller: {
-          select: { isOfficial: true, user: { select: { name: true } } },
+          select: { isOfficial: true, merchant_name: true },
         },
       };
 
@@ -186,7 +284,7 @@ export class ProductRepository implements ProductRepositoryInterface {
                 total_sold: product.totalSold ?? 0,
                 images: product.images.map((img) => img.url),
                 avg_rating: product.avgRating,
-                seller_name: product.seller.user.name,
+                seller_name: product.seller.merchant_name,
                 is_official_store: product.seller.isOfficial,
               }),
           ),
@@ -227,7 +325,7 @@ export class ProductRepository implements ProductRepositoryInterface {
               total_sold: product.totalSold ?? 0,
               images: product.images.map((img) => img.url),
               avg_rating: product.avgRating,
-              seller_name: product.seller.user.name,
+              seller_name: product.seller.merchant_name,
               is_official_store: product.seller.isOfficial,
             }),
         ),
