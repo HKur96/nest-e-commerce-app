@@ -6,6 +6,7 @@ import {
   Param,
   ParseEnumPipe,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -30,6 +31,8 @@ import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
 import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 import { ParseInsensitiveEnumPipe } from '@/utils/pipe/customParseEnumPipe';
+import { CreateReviewDto } from '../../domains/dtos/createReview.dto';
+import { User, UserData } from '@/utils/decorators/user.decorator';
 
 @ApiTags('Product')
 @ApiBearerAuth('access-token')
@@ -126,5 +129,24 @@ export class ProductController {
     type: CollectionType,
   ): Promise<ApiResponseDto<ProductResponse[]>> {
     return this.productUseCase.getProductCollections(type);
+  }
+
+  @ApiOperation({ summary: 'Endpoint to create a review' })
+  @ApiBody({
+    type: CreateReviewDto,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Review successfully created',
+    type: Boolean,
+  })
+  @Roles(Role.USER)
+  @Patch('/review')
+  async createReview(
+    @Body() dto: CreateReviewDto,
+    @User() user: UserData,
+  ): Promise<ApiResponseDto<boolean>> {
+    return this.productUseCase.createReview(dto, user);
   }
 }

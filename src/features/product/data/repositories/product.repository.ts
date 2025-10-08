@@ -13,10 +13,42 @@ import {
   ReviewDetail,
 } from '../../domains/responses/detailProduct.response';
 import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
+import { UserData } from '@/utils/decorators/user.decorator';
+import { CreateReviewDto } from '../../domains/dtos/createReview.dto';
 
 @Injectable()
 export class ProductRepository implements ProductRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createReview(
+    { product_id, rating, comment }: CreateReviewDto,
+    user: UserData,
+  ): Promise<ApiResponseDto<boolean>> {
+    try {
+      await this.prisma.review.upsert({
+        where: {
+          productId_userId: {
+            productId: product_id,
+            userId: user.id,
+          },
+        },
+        update: {
+          rating,
+          comment,
+        },
+        create: {
+          productId: product_id,
+          rating,
+          comment,
+          userId: user.id,
+        },
+      });
+
+      return ApiResponseDto.success('Review successfully created', true);
+    } catch (error) {
+      return ApiResponseDto.error('Unexpected error while create a review');
+    }
+  }
 
   async createProductCollection({
     name,

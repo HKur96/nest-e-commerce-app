@@ -6,6 +6,8 @@ import { CategoryResponse } from '../responses/category.response';
 import { DetailProductResponse } from '../responses/detailProduct.response';
 import { CollectionType } from '@prisma/client';
 import { CreateCollectionDto } from '../dtos/createCollection.dto';
+import { CreateReviewDto } from '../dtos/createReview.dto';
+import { UserData } from '@/utils/decorators/user.decorator';
 
 export interface ProductRepositoryInterface {
   createProduct(
@@ -27,4 +29,6 @@ export interface ProductRepositoryInterface {
   getProductCollections(
     type: CollectionType,
   ): Promise<ApiResponseDto<ProductResponse[]>>;
+
+  createReview(dto: CreateReviewDto, user: UserData): Promise<ApiResponseDto<boolean>>;
 }

@@ -232,6 +232,7 @@ model Review {
 
   @@index([productId])
   @@index([userId])
+  @@unique([productId, userId])
 }
 
 model Cart {

@@ -8,6 +8,8 @@ import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
 import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
 import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
+import { CreateReviewDto } from '../../domains/dtos/createReview.dto';
+import { UserData } from '@/utils/decorators/user.decorator';
 
 @Injectable()
 export class ProductUseCase {
@@ -45,5 +47,12 @@ export class ProductUseCase {
     type: CollectionType,
   ): Promise<ApiResponseDto<ProductResponse[]>> {
     return await this.productRepository.getProductCollections(type);
+  }
+
+  async createReview(
+    dto: CreateReviewDto,
+    user: UserData,
+  ): Promise<ApiResponseDto<boolean>> {
+    return await this.productRepository.createReview(dto, user);
   }
 }
