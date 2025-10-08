@@ -18,10 +18,18 @@ import { ApiResponseDto } from '@/utils/response/api.response.dto';
 import { AuthGuard } from '@/utils/guards/auth.guard';
 import { ProductResponse } from '../../domains/responses/product.response';
 import { SearchProductDto } from '../../domains/dtos/searchProduct.dto';
-import { ApiTags, ApiResponse, ApiQuery, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiResponse,
+  ApiQuery,
+  ApiOperation,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CategoryResponse } from '../../domains/responses/category.response';
 import { DetailProductResponse } from '../../domains/responses/detailProduct.response';
 import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
+import { ParseInsensitiveEnumPipe } from '@/utils/pipe/customParseEnumPipe';
 
 @ApiTags('Product')
 @ApiBearerAuth('access-token')
@@ -30,7 +38,7 @@ import { CreateCollectionDto } from '../../domains/dtos/createCollection.dto';
 export class ProductController {
   constructor(private readonly productUseCase: ProductUseCase) {}
 
-  @ApiOperation({ summary: 'Endpoint to create an order' })
+  @ApiOperation({ summary: 'Endpoint to create a product' })
   @Roles(Role.SELLER)
   @ApiResponse({
     status: 200,
@@ -90,15 +98,16 @@ export class ProductController {
   }
 
   @ApiOperation({ summary: 'Endpoint to create product collection' })
-  @ApiBody({type: CreateCollectionDto, required: true})
+  @ApiBody({ type: CreateCollectionDto, required: true })
   @ApiResponse({
     status: 200,
     description: 'Product collection successfully created',
     type: Boolean,
   })
-  @Post('/product/collection')
+  @Roles(Role.ADMIN, Role.SELLER)
+  @Post('/collection')
   async createProductCollection(
-    dto: CreateCollectionDto,
+    @Body() dto: CreateCollectionDto,
   ): Promise<ApiResponseDto<boolean>> {
     return this.productUseCase.createProductCollection(dto);
   }
@@ -110,8 +119,10 @@ export class ProductController {
     type: ProductResponse,
     isArray: true,
   })
-  @Get('/product/collection')
+  @Roles(Role.ADMIN, Role.SELLER, Role.USER)
+  @Get('/collection/:type')
   async getProductCollections(
+    @Param('type', new ParseInsensitiveEnumPipe(CollectionType))
     type: CollectionType,
   ): Promise<ApiResponseDto<ProductResponse[]>> {
     return this.productUseCase.getProductCollections(type);

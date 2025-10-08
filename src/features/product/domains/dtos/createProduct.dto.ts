@@ -55,13 +55,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  sellerId: number;
+  seller_id: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  categoryId: number;
+  category_id: number;
 
   @ApiProperty({ type: [String], required: false, nullable: true })
   @IsNotEmpty()

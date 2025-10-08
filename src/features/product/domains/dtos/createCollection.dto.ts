@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CollectionType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
-  ValidateNested,
 } from 'class-validator';
 
 export class CreateCollectionDto {
@@ -28,7 +28,7 @@ export class CreateCollectionDto {
 
   @ApiProperty({ type: [Number], required: true })
   @IsArray()
-  @ValidateNested({ each: true })
   @Type(() => Number)
+  @ArrayMinSize(1)
   product_ids: number[];
 }

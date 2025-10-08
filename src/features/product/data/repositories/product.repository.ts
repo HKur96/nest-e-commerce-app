@@ -25,7 +25,7 @@ export class ProductRepository implements ProductRepositoryInterface {
     seller_id,
   }: CreateCollectionDto): Promise<ApiResponseDto<boolean>> {
     try {
-      const newCollection = await this.prisma.collection.create({
+      await this.prisma.collection.create({
         data: {
           type,
           name,
@@ -43,10 +43,7 @@ export class ProductRepository implements ProductRepositoryInterface {
         },
       });
 
-      return ApiResponseDto.success(
-        'Collection created successfully',
-        !newCollection,
-      );
+      return ApiResponseDto.success('Collection created successfully', true);
     } catch (error) {
       return ApiResponseDto.error('Failed to create collection', error.message);
     }
@@ -89,6 +86,8 @@ export class ProductRepository implements ProductRepositoryInterface {
             : 0;
         return { ...p, avgRating };
       });
+
+      withAvg.sort((a, b) => a.product.id - b.product.id);
 
       return ApiResponseDto.success(
         'Collections retrieved successfully',
@@ -343,7 +342,12 @@ export class ProductRepository implements ProductRepositoryInterface {
     price,
     images,
     variants,
-    ...productData
+    category_id,
+    description,
+    name,
+    seller_id,
+    slug,
+    stock,
   }: CreateProductDto): Promise<ApiResponseDto<ProductResponse>> {
     try {
       const productSelect = {
@@ -360,7 +364,14 @@ export class ProductRepository implements ProductRepositoryInterface {
 
       const product = await this.prisma.product.create({
         data: {
-          ...productData,
+          ...{
+            categoryId: category_id,
+            sellerId: seller_id,
+            description,
+            name,
+            slug,
+            stock,
+          },
           price: new Prisma.Decimal(price),
           ...(images?.length && {
             images: { create: images.map((url) => ({ url })) },
